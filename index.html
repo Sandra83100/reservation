@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Réservation d'ateliers</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <h1>🎨 Réservation d'ateliers</h1>
+    <p class="subtitle">Choisissez une date pour voir les ateliers disponibles</p>
+  </header>
+
+  <main>
+
+    <!-- ─── CALENDRIER ─────────────────────────────────────── -->
+    <section class="calendrier-section">
+
+      <div class="calendrier-nav">
+        <button id="btn-prev" aria-label="Mois précédent">&#8592;</button>
+        <h2 id="mois-titre">Chargement…</h2>
+        <button id="btn-next" aria-label="Mois suivant">&#8594;</button>
+      </div>
+
+      <div class="calendrier-jours-semaine">
+        <span>Lun</span><span>Mar</span><span>Mer</span>
+        <span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
+      </div>
+
+      <div id="calendrier-grille" class="calendrier-grille">
+        <!-- Rempli dynamiquement par script.js -->
+      </div>
+
+    </section>
+
+    <!-- ─── ATELIERS DU JOUR ────────────────────────────────── -->
+    <section id="ateliers-section" class="ateliers-section hidden">
+
+      <h2 id="ateliers-titre">Ateliers disponibles</h2>
+
+      <div id="ateliers-liste" class="ateliers-liste">
+        <!-- Rempli dynamiquement par script.js -->
+      </div>
+
+      <button id="btn-retour" class="btn-secondaire">← Retour au calendrier</button>
+
+    </section>
+
+    <!-- ─── FORMULAIRE DE RÉSERVATION ──────────────────────── -->
+    <section id="formulaire-section" class="formulaire-section hidden">
+
+      <h2>Confirmer la réservation</h2>
+
+      <div id="recap-atelier" class="recap-atelier">
+        <!-- Rappel de l'atelier choisi -->
+      </div>
+
+      <form id="form-reservation" novalidate>
+
+        <div class="champ">
+          <label for="nom">Nom / Prénom <span class="obligatoire">*</span></label>
+          <input type="text" id="nom" name="nom" placeholder="ex : Marie Dupont" required autocomplete="name" />
+          <span class="erreur-champ" id="erreur-nom"></span>
+        </div>
+
+        <div class="champ">
+          <label for="email">Email <span class="obligatoire">*</span></label>
+          <input type="email" id="email" name="email" placeholder="ex : marie@email.com" required autocomplete="email" />
+          <span class="erreur-champ" id="erreur-email"></span>
+        </div>
+
+        <div class="champ">
+          <label for="tel">Téléphone <span class="obligatoire">*</span></label>
+          <input type="tel" id="tel" name="tel" placeholder="ex : 06 12 34 56 78" required autocomplete="tel" />
+          <span class="erreur-champ" id="erreur-tel"></span>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="btn-annuler" class="btn-secondaire">← Annuler</button>
+          <button type="submit" id="btn-confirmer" class="btn-principal">
+            <span id="btn-confirmer-texte">Confirmer ma réservation</span>
+            <span id="btn-confirmer-loader" class="hidden">⏳ Envoi en cours…</span>
+          </button>
+        </div>
+
+      </form>
+
+    </section>
+
+    <!-- ─── CONFIRMATION FINALE ─────────────────────────────── -->
+    <section id="confirmation-section" class="confirmation-section hidden">
+      <div class="confirmation-card">
+        <div class="confirmation-icone">✅</div>
+        <h2>Réservation confirmée !</h2>
+        <p id="confirmation-message"></p>
+        <button id="btn-nouvelle-resa" class="btn-principal">Faire une autre réservation</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── INDICATEUR DE CHARGEMENT ──────────────────────────── -->
+  <div id="loader" class="loader hidden">
+    <div class="loader-spinner"></div>
+    <p>Chargement des ateliers…</p>
+  </div>
+
+  <!-- ─── MESSAGE D'ERREUR GLOBAL ───────────────────────────── -->
+  <div id="erreur-globale" class="erreur-globale hidden">
+    <p id="erreur-globale-message"></p>
+    <button id="btn-reessayer" class="btn-secondaire">Réessayer</button>
+  </div>
+
+  <footer>
+    <p>Les champs marqués <span class="obligatoire">*</span> sont obligatoires.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
