@@ -377,6 +377,71 @@ main {
 
 .obligatoire { color: var(--rouge); }
 
+/* Note rassurante sous un champ */
+.champ-note {
+  font-size: 0.75rem;
+  color: var(--texte-doux);
+  font-style: italic;
+  margin-top: 0.35rem;
+  line-height: 1.5;
+}
+
+/* Newsletter */
+.newsletter-bloc {
+  background: var(--vert-dates-bg);
+  border: 1.5px solid var(--vert-dates-brd);
+  border-radius: 10px;
+  padding: .85rem 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.newsletter-label {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  cursor: pointer;
+  font-size: .9rem;
+  color: var(--texte);
+  line-height: 1.5;
+}
+
+.newsletter-label input[type="checkbox"] {
+  margin-top: .2rem;
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  accent-color: var(--vert-primaire);
+  cursor: pointer;
+}
+
+/* RGPD */
+.rgpd-bloc {
+  background: #F5F5F5;
+  border-radius: 8px;
+  padding: .75rem 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.rgpd-titre {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--texte-doux);
+  margin-bottom: .3rem;
+}
+
+.rgpd-texte {
+  font-size: 0.7rem;
+  color: #777;
+  line-height: 1.6;
+}
+
+.rgpd-lien {
+  color: var(--vert-primaire);
+  text-decoration: underline;
+}
+
 .form-actions {
   display: flex;
   gap: .8rem;
