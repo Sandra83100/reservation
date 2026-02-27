@@ -1,18 +1,29 @@
 // ============================================================
-//  CONFIGURATION — ⚠️ Remplacer par l'URL de ton Apps Script
+//  CONFIGURATION
 // ============================================================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXsam9kpgaGdwVbf0LYkqBpgFayk9dexy6y2CyeSvwVqvWB-SMGbrDF5Hn4m2AJKoB/exec';
+
+// Config visuelle par type d'atelier (photo + description)
+const CONFIG_ATELIERS = {
+  'Rencontre avec les animaux': {
+    photo: 'https://picsum.photos/seed/animaux42/700/400',
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.'
+  },
+  'Mémoires de l\'écoferme': {
+    photo: 'https://picsum.photos/seed/ferme77/700/400',
+    description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.'
+  },
+  'Visite découverte de l\'Écoferme': {
+    photo: 'https://picsum.photos/seed/ecoferme33/700/400',
+    description: 'Ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.'
+  }
+};
 
 // ============================================================
 //  ÉTAT GLOBAL
 // ============================================================
-let ateliers       = [];   // Tous les ateliers chargés depuis la Sheet
-let ateliersParDate = {};  // { "DD/MM/YYYY": [atelier, ...] }
-let dateSelectionnee = null;
+let ateliers = [];
 let atelierSelectionne = null;
-
-let moisCourant = new Date().getMonth();
-let anneeCourante = new Date().getFullYear();
 
 // ============================================================
 //  INITIALISATION
@@ -23,231 +34,152 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function bindEvents() {
-  document.getElementById('btn-prev').addEventListener('click', () => {
-    moisCourant--;
-    if (moisCourant < 0) { moisCourant = 11; anneeCourante--; }
-    renderCalendrier();
-  });
-
-  document.getElementById('btn-next').addEventListener('click', () => {
-    moisCourant++;
-    if (moisCourant > 11) { moisCourant = 0; anneeCourante++; }
-    renderCalendrier();
-  });
-
-  document.getElementById('btn-retour').addEventListener('click', () => {
-    afficherSection('calendrier');
-  });
-
-  document.getElementById('btn-annuler').addEventListener('click', () => {
-    afficherSection('ateliers');
-  });
-
+  document.getElementById('btn-annuler').addEventListener('click', () => afficherSection('cartes'));
   document.getElementById('btn-nouvelle-resa').addEventListener('click', () => {
     atelierSelectionne = null;
-    afficherSection('calendrier');
+    afficherSection('cartes');
   });
-
   document.getElementById('btn-reessayer').addEventListener('click', () => {
     masquerErreurGlobale();
     chargerAteliers();
   });
-
   document.getElementById('form-reservation').addEventListener('submit', soumettreReservation);
 }
 
 // ============================================================
-//  CHARGEMENT DES ATELIERS (GET)
+//  CHARGEMENT DES ATELIERS
 // ============================================================
 async function chargerAteliers() {
   afficherLoader(true);
   masquerErreurGlobale();
-
   try {
-    const url = `${APPS_SCRIPT_URL}?action=getAteliers`;
-    const resp = await fetch(url);
-
-    if (!resp.ok) throw new Error(`Erreur HTTP ${resp.status}`);
-
+    const resp = await fetch(`${APPS_SCRIPT_URL}?action=getAteliers`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
-
     if (data.error) throw new Error(data.error);
-
     ateliers = data;
-    indexerAteliersParDate();
-    renderCalendrier();
-
+    renderCartes();
   } catch (err) {
     console.error('Erreur chargement ateliers :', err);
     afficherErreurGlobale('Impossible de charger les ateliers. Vérifiez votre connexion.');
-    // Affiche quand même le calendrier (vide)
-    renderCalendrier();
+    renderCartes();
   } finally {
     afficherLoader(false);
   }
 }
 
-/** Crée un index { "DD/MM/YYYY": [atelier, ...] } pour accès rapide */
-function indexerAteliersParDate() {
-  ateliersParDate = {};
+// ============================================================
+//  RENDU DES CARTES PAR TYPE D'ATELIER
+// ============================================================
+function renderCartes() {
+  const conteneur = document.getElementById('cartes-ateliers');
+  conteneur.innerHTML = '';
+
+  // Grouper par nom d'atelier
+  const parType = {};
   ateliers.forEach(a => {
-    if (!ateliersParDate[a.date]) {
-      ateliersParDate[a.date] = [];
-    }
-    ateliersParDate[a.date].push(a);
+    if (!parType[a.nom]) parType[a.nom] = [];
+    parType[a.nom].push(a);
   });
-}
 
-// ============================================================
-//  RENDU DU CALENDRIER
-// ============================================================
-function renderCalendrier() {
-  const moisNoms = [
-    'Janvier','Février','Mars','Avril','Mai','Juin',
-    'Juillet','Août','Septembre','Octobre','Novembre','Décembre'
-  ];
-
-  document.getElementById('mois-titre').textContent =
-    `${moisNoms[moisCourant]} ${anneeCourante}`;
-
-  const grille = document.getElementById('calendrier-grille');
-  grille.innerHTML = '';
-
-  const aujourd = new Date();
-  aujourd.setHours(0, 0, 0, 0);
-
-  // Premier jour du mois (0=Dim, 1=Lun, ... 6=Sam)
-  const premierJour = new Date(anneeCourante, moisCourant, 1);
-  // Décalage pour commencer lundi (0=lundi ... 6=dimanche)
-  let decalage = premierJour.getDay() - 1;
-  if (decalage < 0) decalage = 6;
-
-  // Nombre de jours dans le mois
-  const nbJours = new Date(anneeCourante, moisCourant + 1, 0).getDate();
-
-  // Cellules vides de début
-  for (let i = 0; i < decalage; i++) {
-    const vide = document.createElement('div');
-    vide.className = 'jour vide';
-    grille.appendChild(vide);
+  if (Object.keys(parType).length === 0) {
+    conteneur.innerHTML = '<p class="cartes-vide">Aucun atelier disponible pour le moment.</p>';
+    return;
   }
 
-  // Jours du mois
-  for (let j = 1; j <= nbJours; j++) {
-    const date = new Date(anneeCourante, moisCourant, j);
-    const dateStr = formatDate(date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-    const div = document.createElement('div');
-    div.textContent = j;
-    div.className = 'jour';
+  Object.entries(parType).forEach(([nom, slots]) => {
+    const cfg = CONFIG_ATELIERS[nom] || {
+      photo: 'https://picsum.photos/seed/atelier/700/400',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+    };
 
-    const estPasse = date < aujourd;
-    const aAteliersDispo = ateliersParDate[dateStr] &&
-      ateliersParDate[dateStr].some(a => a.placesRestantes > 0);
+    const placesMax = slots[0]?.placesMax || 8;
 
-    if (date.toDateString() === aujourd.toDateString()) {
-      div.classList.add('aujourdhui');
-    }
+    // Filtrer les créneaux futurs avec places disponibles
+    const slotsDispos = slots.filter(a => {
+      const [dd, mm, yyyy] = a.date.split('/');
+      const dateAtelier = new Date(yyyy, mm - 1, dd);
+      return dateAtelier >= today && a.placesRestantes > 0;
+    });
 
-    if (!estPasse && aAteliersDispo) {
-      div.classList.add('actif');
-      div.setAttribute('role', 'button');
-      div.setAttribute('tabindex', '0');
-      div.setAttribute('aria-label', `Voir les ateliers du ${dateStr}`);
-      div.addEventListener('click', () => ouvrirJour(dateStr));
-      div.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') ouvrirJour(dateStr);
-      });
-      if (dateStr === dateSelectionnee) {
-        div.classList.add('selectionne');
-      }
-    } else {
-      div.classList.add('inactif');
-    }
+    const carte = document.createElement('article');
+    carte.className = 'carte-atelier';
 
-    grille.appendChild(div);
-  }
-}
-
-/** Formate un objet Date en "DD/MM/YYYY" */
-function formatDate(date) {
-  const dd   = String(date.getDate()).padStart(2, '0');
-  const mm   = String(date.getMonth() + 1).padStart(2, '0');
-  const yyyy = date.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-}
-
-// ============================================================
-//  AFFICHAGE DES ATELIERS D'UN JOUR
-// ============================================================
-function ouvrirJour(dateStr) {
-  dateSelectionnee = dateStr;
-  renderCalendrier(); // met à jour la sélection visuelle
-
-  const liste = document.getElementById('ateliers-liste');
-  liste.innerHTML = '';
-
-  const ateliersJour = ateliersParDate[dateStr] || [];
-
-  document.getElementById('ateliers-titre').textContent =
-    `Ateliers du ${dateStr}`;
-
-  ateliersJour.forEach(a => {
-    const card = document.createElement('div');
-    card.className = `atelier-card${a.placesRestantes === 0 ? ' complet' : ''}`;
-
-    // Badge places
-    let badgeClass = 'dispo';
-    let badgeTexte = `${a.placesRestantes}/${a.placesMax} places`;
-    if (a.placesRestantes === 0) {
-      badgeClass = 'complet';
-      badgeTexte = 'Complet';
-    } else if (a.placesRestantes <= 2) {
-      badgeClass = 'last';
-      badgeTexte = `Plus que ${a.placesRestantes} place${a.placesRestantes > 1 ? 's' : ''} !`;
-    }
-
-    card.innerHTML = `
-      <div class="atelier-info">
-        <div class="atelier-nom">${escapeHtml(a.nom)}</div>
-        <div class="atelier-horaire">🕐 ${a.debut} – ${a.fin}</div>
+    carte.innerHTML = `
+      <div class="carte-photo">
+        <img src="${cfg.photo}" alt="${escapeHtml(nom)}" loading="lazy" />
+        <span class="carte-badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+          </svg>
+          ${placesMax} places
+        </span>
       </div>
-      <span class="atelier-places ${badgeClass}">${badgeTexte}</span>
-      <button
-        class="btn-reserver"
-        ${a.placesRestantes === 0 ? 'disabled' : ''}
-        data-id="${a.id}"
-      >${a.placesRestantes === 0 ? 'Complet' : 'Réserver'}</button>
+      <div class="carte-corps">
+        <h2 class="carte-titre">${escapeHtml(nom)}</h2>
+        <p class="carte-description">${cfg.description}</p>
+        <div class="carte-dates">
+          <p class="carte-dates-titre">📅 Dates disponibles</p>
+          ${slotsDispos.length === 0
+            ? '<p class="carte-complet">Toutes les sessions sont actuellement complètes.</p>'
+            : slotsDispos.map(a => {
+                const badgeClass = a.placesRestantes <= 2 ? 'last' : 'dispo';
+                const badgeTexte = a.placesRestantes <= 2
+                  ? `⚡ ${a.placesRestantes} place${a.placesRestantes > 1 ? 's' : ''} restante${a.placesRestantes > 1 ? 's' : ''}`
+                  : `${a.placesRestantes}/${a.placesMax} places`;
+                return `
+                  <div class="carte-slot">
+                    <div class="slot-info">
+                      <span class="slot-date">${formatDateLisible(a.date)}</span>
+                      <span class="slot-horaire">🕐 ${a.debut} – ${a.fin}</span>
+                      <span class="slot-places ${badgeClass}">${badgeTexte}</span>
+                    </div>
+                    <button class="btn-reserver-slot" data-id="${a.id}">Réserver</button>
+                  </div>
+                `;
+              }).join('')
+          }
+        </div>
+      </div>
     `;
 
-    if (a.placesRestantes > 0) {
-      card.querySelector('.btn-reserver').addEventListener('click', () => {
-        ouvrirFormulaire(a);
-      });
-    }
+    // Attacher les événements sur chaque bouton Réserver
+    slotsDispos.forEach(a => {
+      const btn = carte.querySelector(`[data-id="${a.id}"]`);
+      if (btn) btn.addEventListener('click', () => ouvrirFormulaire(a));
+    });
 
-    liste.appendChild(card);
+    conteneur.appendChild(carte);
   });
+}
 
-  afficherSection('ateliers');
+/** Convertit "DD/MM/YYYY" en "Mer. 4 mars" */
+function formatDateLisible(dateStr) {
+  const [dd, mm, yyyy] = dateStr.split('/');
+  const date = new Date(yyyy, mm - 1, dd);
+  const jours = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
+  const mois  = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
+                  'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]}`;
 }
 
 // ============================================================
-//  FORMULAIRE DE RÉSERVATION
+//  FORMULAIRE
 // ============================================================
 function ouvrirFormulaire(atelier) {
   atelierSelectionne = atelier;
 
   document.getElementById('recap-atelier').innerHTML = `
     <strong>${escapeHtml(atelier.nom)}</strong>
-    📅 ${atelier.date} &nbsp;|&nbsp; 🕐 ${atelier.debut} – ${atelier.fin}
+    📅 ${formatDateLisible(atelier.date)} &nbsp;|&nbsp; 🕐 ${atelier.debut} – ${atelier.fin}
     &nbsp;|&nbsp; <span class="atelier-places dispo">${atelier.placesRestantes} place${atelier.placesRestantes > 1 ? 's' : ''} disponible${atelier.placesRestantes > 1 ? 's' : ''}</span>
   `;
 
-  // Réinitialise le formulaire
   document.getElementById('form-reservation').reset();
   effacerErreurs();
-
   afficherSection('formulaire');
 }
 
@@ -258,39 +190,20 @@ async function soumettreReservation(e) {
   const email = document.getElementById('email').value.trim();
   const tel   = document.getElementById('tel').value.trim();
 
-  // Validation
   let valide = true;
-
-  if (!nom) {
-    afficherErreurChamp('nom', 'Veuillez saisir votre nom et prénom.');
-    valide = false;
-  }
-  if (!email || !isEmailValide(email)) {
-    afficherErreurChamp('email', 'Veuillez saisir une adresse email valide.');
-    valide = false;
-  }
-  if (!tel) {
-    afficherErreurChamp('tel', 'Veuillez saisir votre numéro de téléphone.');
-    valide = false;
-  }
-
+  if (!nom)                     { afficherErreurChamp('nom',   'Veuillez saisir votre nom et prénom.'); valide = false; }
+  if (!email || !isEmailValide(email)) { afficherErreurChamp('email', 'Adresse email invalide.'); valide = false; }
+  if (!tel)                     { afficherErreurChamp('tel',   'Veuillez saisir votre téléphone.'); valide = false; }
   if (!valide) return;
 
-  // Envoi
   setBoutonConfirmer(true);
 
   try {
-    const payload = {
-      atelierId: atelierSelectionne.id,
-      nom, email, tel
-    };
-
     const resp = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ atelierId: atelierSelectionne.id, nom, email, tel })
     });
-
     const data = await resp.json();
 
     if (data.error) {
@@ -299,41 +212,34 @@ async function soumettreReservation(e) {
       return;
     }
 
-    // Succès
     document.getElementById('confirmation-message').textContent =
       data.message || 'Votre réservation a bien été enregistrée.';
 
-    // Met à jour le compteur local pour refléter immédiatement
+    // Mettre à jour le compteur local
     const a = ateliers.find(x => x.id === atelierSelectionne.id);
     if (a) a.placesRestantes = Math.max(0, a.placesRestantes - 1);
-    indexerAteliersParDate();
 
     afficherSection('confirmation');
 
   } catch (err) {
-    console.error('Erreur envoi réservation :', err);
-    afficherErreurGlobale('Une erreur est survenue lors de l\'envoi. Veuillez réessayer.');
+    console.error('Erreur envoi :', err);
+    afficherErreurGlobale('Une erreur est survenue. Veuillez réessayer.');
     setBoutonConfirmer(false);
   }
 }
 
 // ============================================================
-//  NAVIGATION ENTRE SECTIONS
+//  NAVIGATION
 // ============================================================
 function afficherSection(section) {
-  document.querySelector('.calendrier-section').classList.add('hidden');
-  document.getElementById('ateliers-section').classList.add('hidden');
+  document.getElementById('cartes-section').classList.add('hidden');
   document.getElementById('formulaire-section').classList.add('hidden');
   document.getElementById('confirmation-section').classList.add('hidden');
 
-  switch(section) {
-    case 'calendrier':
-      dateSelectionnee = null;
-      renderCalendrier();
-      document.querySelector('.calendrier-section').classList.remove('hidden');
-      break;
-    case 'ateliers':
-      document.getElementById('ateliers-section').classList.remove('hidden');
+  switch (section) {
+    case 'cartes':
+      renderCartes();
+      document.getElementById('cartes-section').classList.remove('hidden');
       break;
     case 'formulaire':
       document.getElementById('formulaire-section').classList.remove('hidden');
@@ -342,7 +248,6 @@ function afficherSection(section) {
       document.getElementById('confirmation-section').classList.remove('hidden');
       break;
   }
-
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -354,9 +259,8 @@ function afficherLoader(visible) {
 }
 
 function afficherErreurGlobale(msg) {
-  const el = document.getElementById('erreur-globale');
   document.getElementById('erreur-globale-message').textContent = msg;
-  el.classList.remove('hidden');
+  document.getElementById('erreur-globale').classList.remove('hidden');
 }
 
 function masquerErreurGlobale() {
@@ -376,23 +280,18 @@ function effacerErreurs() {
 }
 
 function setBoutonConfirmer(enCours) {
-  const btn    = document.getElementById('btn-confirmer');
-  const texte  = document.getElementById('btn-confirmer-texte');
-  const loader = document.getElementById('btn-confirmer-loader');
+  const btn = document.getElementById('btn-confirmer');
+  document.getElementById('btn-confirmer-texte').classList.toggle('hidden', enCours);
+  document.getElementById('btn-confirmer-loader').classList.toggle('hidden', !enCours);
   btn.disabled = enCours;
-  texte.classList.toggle('hidden', enCours);
-  loader.classList.toggle('hidden', !enCours);
 }
 
 function isEmailValide(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-/** Protège contre les injections XSS */
 function escapeHtml(str) {
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
