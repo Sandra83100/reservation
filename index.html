@@ -53,9 +53,9 @@
           <p class="champ-note">📞 Votre numéro ne nous servira qu'à vous prévenir si l'atelier devait être annulé ou modifié — jamais à autre chose.</p>
         </div>
 
-        <div class="champ">
+        <div id="champ-nb-personnes" class="champ">
           <label for="nb-personnes">Nombre de participants <span class="obligatoire">*</span></label>
-          <select id="nb-personnes" name="nbPersonnes" required>
+          <select id="nb-personnes" name="nbPersonnes">
             <option value="">-- Choisir --</option>
             <option value="1">1 personne</option>
             <option value="2">2 personnes</option>
@@ -63,6 +63,33 @@
             <option value="4">4 personnes</option>
           </select>
           <span class="erreur-champ" id="erreur-nb-personnes"></span>
+        </div>
+
+        <!-- ── Section spécifique : Rencontre avec les animaux ── -->
+        <div id="section-animaux" class="section-animaux hidden">
+
+          <div class="animaux-alerte">
+            <span class="animaux-alerte-icone">👨‍👧</span>
+            <div>
+              <strong>Un adulte accompagnant est obligatoire</strong> pour chaque session.<br>
+              L'adulte sera compté dans les places réservées.
+            </div>
+          </div>
+
+          <div class="champ">
+            <label for="nb-enfants">Nombre d'enfants <span class="obligatoire">*</span></label>
+            <select id="nb-enfants" name="nbEnfants">
+              <option value="">-- Choisir --</option>
+              <option value="1">1 enfant</option>
+              <option value="2">2 enfants</option>
+              <option value="3">3 enfants</option>
+              <option value="4">4 enfants</option>
+            </select>
+            <span class="erreur-champ" id="erreur-nb-enfants"></span>
+          </div>
+
+          <div id="ages-enfants" class="ages-enfants"></div>
+
         </div>
 
         <div class="newsletter-bloc">

@@ -55,6 +55,7 @@ function bindEvents() {
     chargerAteliers();
   });
   document.getElementById('form-reservation').addEventListener('submit', soumettreReservation);
+  document.getElementById('nb-enfants').addEventListener('change', genererAgesEnfants);
 }
 
 // ============================================================
@@ -187,6 +188,8 @@ function formatDateLisible(dateStr) {
 // ============================================================
 //  FORMULAIRE
 // ============================================================
+const NOM_ATELIER_ANIMAUX = 'Rencontre avec les animaux';
+
 function ouvrirFormulaire(atelier) {
   atelierSelectionne = atelier;
 
@@ -198,7 +201,37 @@ function ouvrirFormulaire(atelier) {
 
   document.getElementById('form-reservation').reset();
   effacerErreurs();
+
+  // Afficher la section adaptée selon l'atelier
+  const estAnimaux = atelier.nom === NOM_ATELIER_ANIMAUX;
+  document.getElementById('champ-nb-personnes').classList.toggle('hidden', estAnimaux);
+  document.getElementById('section-animaux').classList.toggle('hidden', !estAnimaux);
+  document.getElementById('ages-enfants').innerHTML = '';
+
   afficherSection('formulaire');
+}
+
+function genererAgesEnfants() {
+  const nb = parseInt(document.getElementById('nb-enfants').value) || 0;
+  const conteneur = document.getElementById('ages-enfants');
+  conteneur.innerHTML = '';
+  for (let i = 1; i <= nb; i++) {
+    const div = document.createElement('div');
+    div.className = 'champ champ-age-enfant';
+    div.innerHTML = `
+      <label for="age-enfant-${i}">
+        Âge de l'enfant ${i} <span class="obligatoire">*</span>
+      </label>
+      <select id="age-enfant-${i}" name="ageEnfant${i}">
+        <option value="">-- Choisir --</option>
+        <option value="moins-3ans">Moins de 3 ans</option>
+        <option value="3-10ans">3 à 10 ans</option>
+        <option value="plus-10ans">Plus de 10 ans</option>
+      </select>
+      <span class="erreur-champ" id="erreur-age-enfant-${i}"></span>
+    `;
+    conteneur.appendChild(div);
+  }
 }
 
 async function soumettreReservation(e) {
@@ -209,10 +242,48 @@ async function soumettreReservation(e) {
   const tel   = document.getElementById('tel').value.trim();
 
   let valide = true;
-  if (!nom)                     { afficherErreurChamp('prenom', 'Veuillez saisir votre prénom.'); valide = false; }
-  if (!email || !isEmailValide(email)) { afficherErreurChamp('email', 'Adresse email invalide.'); valide = false; }
-  if (!tel)                     { afficherErreurChamp('tel',   'Veuillez saisir votre téléphone.'); valide = false; }
+  if (!nom)                          { afficherErreurChamp('prenom', 'Veuillez saisir votre prénom.'); valide = false; }
+  if (!email || !isEmailValide(email)) { afficherErreurChamp('email',  'Adresse email invalide.'); valide = false; }
+  if (!tel)                          { afficherErreurChamp('tel',    'Veuillez saisir votre téléphone.'); valide = false; }
+
+  // Calcul du nombre de participants selon l'atelier
+  let nbPersonnes = 0;
+  const estAnimaux = atelierSelectionne.nom === NOM_ATELIER_ANIMAUX;
+
+  if (estAnimaux) {
+    const nbEnfants = parseInt(document.getElementById('nb-enfants').value) || 0;
+    if (!nbEnfants) {
+      afficherErreurChamp('nb-enfants', 'Veuillez indiquer le nombre d\'enfants.');
+      valide = false;
+    } else {
+      // Valider l'âge de chaque enfant
+      for (let i = 1; i <= nbEnfants; i++) {
+        const sel = document.getElementById(`age-enfant-${i}`);
+        if (!sel || !sel.value) {
+          afficherErreurChamp(`age-enfant-${i}`, 'Veuillez indiquer l\'âge de cet enfant.');
+          valide = false;
+        }
+      }
+      nbPersonnes = nbEnfants + 1; // enfants + 1 adulte obligatoire
+    }
+  } else {
+    nbPersonnes = parseInt(document.getElementById('nb-personnes').value) || 0;
+    if (!nbPersonnes) {
+      afficherErreurChamp('nb-personnes', 'Veuillez indiquer le nombre de participants.');
+      valide = false;
+    }
+  }
+
   if (!valide) return;
+
+  // Collecter les âges des enfants si atelier animaux
+  const agesEnfants = [];
+  if (estAnimaux) {
+    const nb = parseInt(document.getElementById('nb-enfants').value);
+    for (let i = 1; i <= nb; i++) {
+      agesEnfants.push(document.getElementById(`age-enfant-${i}`).value);
+    }
+  }
 
   setBoutonConfirmer(true);
 
@@ -220,7 +291,12 @@ async function soumettreReservation(e) {
     const resp = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ atelierId: atelierSelectionne.id, nom, email, tel })
+      body: JSON.stringify({
+        atelierId: atelierSelectionne.id,
+        nom, email, tel,
+        nbPersonnes,
+        ...(estAnimaux && { agesEnfants })
+      })
     });
     const data = await resp.json();
 
