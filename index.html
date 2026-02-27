@@ -3,49 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Réservation d'ateliers</title>
+  <title>Réservation d'ateliers – Écoferme</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <header>
-    <h1>🎨 Réservation d'ateliers</h1>
-    <p class="subtitle">Choisissez une date pour voir les ateliers disponibles</p>
+    <div class="header-inner">
+      <h1>🌿 Nos ateliers</h1>
+      <p class="subtitle">Venez vivre une expérience unique au cœur de la nature — réservez votre place en quelques clics !</p>
+    </div>
   </header>
 
   <main>
 
-    <!-- ─── CALENDRIER ─────────────────────────────────────── -->
-    <section class="calendrier-section">
-
-      <div class="calendrier-nav">
-        <button id="btn-prev" aria-label="Mois précédent">&#8592;</button>
-        <h2 id="mois-titre">Chargement…</h2>
-        <button id="btn-next" aria-label="Mois suivant">&#8594;</button>
-      </div>
-
-      <div class="calendrier-jours-semaine">
-        <span>Lun</span><span>Mar</span><span>Mer</span>
-        <span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
-      </div>
-
-      <div id="calendrier-grille" class="calendrier-grille">
-        <!-- Rempli dynamiquement par script.js -->
-      </div>
-
-    </section>
-
-    <!-- ─── ATELIERS DU JOUR ────────────────────────────────── -->
-    <section id="ateliers-section" class="ateliers-section hidden">
-
-      <h2 id="ateliers-titre">Ateliers disponibles</h2>
-
-      <div id="ateliers-liste" class="ateliers-liste">
-        <!-- Rempli dynamiquement par script.js -->
-      </div>
-
-      <button id="btn-retour" class="btn-secondaire">← Retour au calendrier</button>
-
+    <!-- ─── CARTES DES ATELIERS ─────────────────────────────── -->
+    <section id="cartes-section" class="cartes-section">
+      <div id="cartes-ateliers" class="cartes-grille"></div>
     </section>
 
     <!-- ─── FORMULAIRE DE RÉSERVATION ──────────────────────── -->
@@ -53,16 +27,14 @@
 
       <h2>Confirmer la réservation</h2>
 
-      <div id="recap-atelier" class="recap-atelier">
-        <!-- Rappel de l'atelier choisi -->
-      </div>
+      <div id="recap-atelier" class="recap-atelier"></div>
 
       <form id="form-reservation" novalidate>
 
         <div class="champ">
-          <label for="nom">Nom / Prénom <span class="obligatoire">*</span></label>
-          <input type="text" id="nom" name="nom" placeholder="ex : Marie Dupont" required autocomplete="name" />
-          <span class="erreur-champ" id="erreur-nom"></span>
+          <label for="prenom">Prénom <span class="obligatoire">*</span></label>
+          <input type="text" id="prenom" name="prenom" placeholder="ex : Marie" required autocomplete="given-name" />
+          <span class="erreur-champ" id="erreur-prenom"></span>
         </div>
 
         <div class="champ">
@@ -77,8 +49,33 @@
           <span class="erreur-champ" id="erreur-tel"></span>
         </div>
 
+        <div class="champ">
+          <label for="nb-personnes">Nombre de participants <span class="obligatoire">*</span></label>
+          <select id="nb-personnes" name="nbPersonnes" required>
+            <option value="">-- Choisir --</option>
+            <option value="1">1 personne</option>
+            <option value="2">2 personnes</option>
+            <option value="3">3 personnes</option>
+            <option value="4">4 personnes</option>
+          </select>
+          <span class="erreur-champ" id="erreur-nb-personnes"></span>
+        </div>
+
+        <div class="rgpd-bloc">
+          <p class="rgpd-titre">🔒 Confidentialité & RGPD</p>
+          <p class="rgpd-texte">
+            Vos données personnelles (prénom, email, téléphone) sont collectées
+            <strong>uniquement pour la gestion de votre réservation d'atelier</strong> et ne seront
+            pas transmises à des tiers. Conformément au <strong>Règlement Général sur la Protection
+            des Données (RGPD – UE 2016/679)</strong> et à la loi Informatique et Libertés,
+            vous disposez d'un droit d'accès, de rectification, de limitation et de suppression de
+            vos données. Vos informations seront conservées pour la durée nécessaire à l'organisation
+            de l'atelier, puis supprimées. Pour exercer vos droits, contactez-nous directement.
+          </p>
+        </div>
+
         <div class="form-actions">
-          <button type="button" id="btn-annuler" class="btn-secondaire">← Annuler</button>
+          <button type="button" id="btn-annuler" class="btn-secondaire">← Retour aux ateliers</button>
           <button type="submit" id="btn-confirmer" class="btn-principal">
             <span id="btn-confirmer-texte">Confirmer ma réservation</span>
             <span id="btn-confirmer-loader" class="hidden">⏳ Envoi en cours…</span>
@@ -86,28 +83,27 @@
         </div>
 
       </form>
-
     </section>
 
     <!-- ─── CONFIRMATION FINALE ─────────────────────────────── -->
     <section id="confirmation-section" class="confirmation-section hidden">
       <div class="confirmation-card">
-        <div class="confirmation-icone">✅</div>
+        <div class="confirmation-icone">🎉</div>
         <h2>Réservation confirmée !</h2>
         <p id="confirmation-message"></p>
-        <button id="btn-nouvelle-resa" class="btn-principal">Faire une autre réservation</button>
+        <button id="btn-nouvelle-resa" class="btn-principal">Réserver un autre atelier</button>
       </div>
     </section>
 
   </main>
 
-  <!-- ─── INDICATEUR DE CHARGEMENT ──────────────────────────── -->
+  <!-- ─── LOADER ─────────────────────────────────────────────── -->
   <div id="loader" class="loader hidden">
     <div class="loader-spinner"></div>
     <p>Chargement des ateliers…</p>
   </div>
 
-  <!-- ─── MESSAGE D'ERREUR GLOBAL ───────────────────────────── -->
+  <!-- ─── ERREUR GLOBALE ─────────────────────────────────────── -->
   <div id="erreur-globale" class="erreur-globale hidden">
     <p id="erreur-globale-message"></p>
     <button id="btn-reessayer" class="btn-secondaire">Réessayer</button>
