@@ -156,13 +156,13 @@ function renderCartes() {
   });
 }
 
-/** Convertit "DD/MM/YYYY" en "Mer. 4 mars" */
+/** Convertit "DD/MM/YYYY" en "Mercredi 4 mars" */
 function formatDateLisible(dateStr) {
   const [dd, mm, yyyy] = dateStr.split('/');
   const date = new Date(yyyy, mm - 1, dd);
-  const jours = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
-  const mois  = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
-                  'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  const mois  = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                  'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]}`;
 }
 
