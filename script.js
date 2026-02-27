@@ -3,19 +3,23 @@
 // ============================================================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXsam9kpgaGdwVbf0LYkqBpgFayk9dexy6y2CyeSvwVqvWB-SMGbrDF5Hn4m2AJKoB/exec';
 
-// Config visuelle par type d'atelier (photo + description)
+// Config visuelle par type d'atelier (photo + description + prix)
+// prix: null = gratuit, chaîne = montant affiché (ex: '5 €/enfant')
 const CONFIG_ATELIERS = {
   'Rencontre avec les animaux': {
     photo: 'https://picsum.photos/seed/animaux42/700/400',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.'
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.',
+    prix: null // Gratuit
   },
   'Mémoires de l\'écoferme': {
     photo: 'https://picsum.photos/seed/ferme77/700/400',
-    description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.'
+    description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.',
+    prix: null // Gratuit
   },
   'Visite découverte de l\'Écoferme': {
     photo: 'https://picsum.photos/seed/ecoferme33/700/400',
-    description: 'Ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.'
+    description: 'Ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.',
+    prix: null // Gratuit
   }
 };
 
@@ -55,7 +59,16 @@ function bindEvents() {
     chargerAteliers();
   });
   document.getElementById('form-reservation').addEventListener('submit', soumettreReservation);
-  document.getElementById('nb-enfants').addEventListener('change', genererAgesEnfants);
+
+  // Stepper enfants (Fiche #02)
+  document.getElementById('stepper-moins').addEventListener('click', () => changerNbEnfants(-1));
+  document.getElementById('stepper-plus').addEventListener('click',  () => changerNbEnfants(+1));
+
+  // Accordéon RGPD (Fiche #06)
+  document.getElementById('toggle-rgpd').addEventListener('click', (e) => {
+    e.preventDefault();
+    toggleRgpd();
+  });
 }
 
 // ============================================================
@@ -127,15 +140,23 @@ function renderCartes() {
     const carte = document.createElement('article');
     carte.className = 'carte-atelier';
 
+    // Badge prix — Fiche #01
+    const badgePrix = cfg.prix
+      ? `<span class="carte-badge-prix payant">💶 ${escapeHtml(cfg.prix)}</span>`
+      : `<span class="carte-badge-prix">🎟 Gratuit</span>`;
+
     carte.innerHTML = `
       <div class="carte-photo">
         <img src="${cfg.photo}" alt="${escapeHtml(nom)}" loading="lazy" />
-        <span class="carte-badge">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
-            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-          </svg>
-          ${placesMax} places
-        </span>
+        <div class="carte-badges">
+          <span class="carte-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            </svg>
+            ${placesMax} places
+          </span>
+          ${badgePrix}
+        </div>
       </div>
       <div class="carte-corps">
         <h2 class="carte-titre">${escapeHtml(nom)}</h2>
@@ -208,7 +229,51 @@ function ouvrirFormulaire(atelier) {
   document.getElementById('section-animaux').classList.toggle('hidden', !estAnimaux);
   document.getElementById('ages-enfants').innerHTML = '';
 
+  // Initialiser le stepper enfants (Fiche #02)
+  if (estAnimaux) {
+    document.getElementById('nb-enfants').value = '1';
+    document.getElementById('nb-enfants-val').textContent = '1';
+    document.getElementById('stepper-moins').disabled = true;
+    document.getElementById('stepper-plus').disabled = false;
+    genererAgesEnfants();
+  }
+
+  // Refermer l'accordéon RGPD à chaque ouverture du formulaire
+  document.getElementById('rgpd-full').classList.add('hidden');
+  document.getElementById('toggle-rgpd').textContent = 'En savoir plus sur vos données ▾';
+
   afficherSection('formulaire');
+}
+
+// ============================================================
+//  STEPPER NOMBRE D'ENFANTS — Fiche #02
+// ============================================================
+const STEPPER_MIN = 1;
+const STEPPER_MAX = 7; // 1 adulte obligatoire + 7 enfants max = 8 places max
+
+function changerNbEnfants(delta) {
+  const input  = document.getElementById('nb-enfants');
+  const valAff = document.getElementById('nb-enfants-val');
+  let val = parseInt(input.value) || STEPPER_MIN;
+  val = Math.min(STEPPER_MAX, Math.max(STEPPER_MIN, val + delta));
+  input.value = String(val);
+  valAff.textContent = val;
+  document.getElementById('stepper-moins').disabled = (val <= STEPPER_MIN);
+  document.getElementById('stepper-plus').disabled  = (val >= STEPPER_MAX);
+  genererAgesEnfants();
+}
+
+// ============================================================
+//  ACCORDÉON RGPD — Fiche #06
+// ============================================================
+function toggleRgpd() {
+  const full   = document.getElementById('rgpd-full');
+  const toggle = document.getElementById('toggle-rgpd');
+  const isHidden = full.classList.contains('hidden');
+  full.classList.toggle('hidden', !isHidden);
+  toggle.textContent = isHidden
+    ? 'Masquer les détails ▴'
+    : 'En savoir plus sur vos données ▾';
 }
 
 function genererAgesEnfants() {

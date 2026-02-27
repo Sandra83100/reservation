@@ -69,6 +69,20 @@ header h1 {
   font-weight: 600;
 }
 
+/* Fiche #01 — Badge Gratuit / Entrée libre dans le header */
+.header-gratuit {
+  display: inline-block;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  border-radius: 30px;
+  padding: .35rem 1.2rem;
+  font-size: .88rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.97);
+  margin-top: .9rem;
+  letter-spacing: .4px;
+}
+
 /* ============================================================
    MAIN
    ============================================================ */
@@ -139,10 +153,18 @@ main {
   transform: scale(1.05);
 }
 
-.carte-badge {
+/* Conteneur empilable pour tous les badges photo */
+.carte-badges {
   position: absolute;
   top: 10px;
   right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.carte-badge {
   background: rgba(255,255,255,0.92);
   color: var(--vert-fonce);
   padding: 4px 11px;
@@ -154,6 +176,25 @@ main {
   gap: 5px;
   letter-spacing: .2px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Badge Gratuit / Payant — Fiche #01 */
+.carte-badge-prix {
+  background: #2D8B3E;
+  color: #fff;
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: .75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: .2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+
+.carte-badge-prix.payant {
+  background: #1A5276;
 }
 
 /* ── Corps ── */
@@ -409,28 +450,30 @@ main {
   margin-bottom: .5rem;
 }
 
+/* Fiche #03 — Bleu informatif (remplace l'orange/ambre) */
 .animaux-alerte {
   display: flex;
   align-items: flex-start;
   gap: .75rem;
-  background: #FFF8E7;
-  border: 2px solid var(--ambre);
+  background: #EAF2FF;
+  border: none;
+  border-left: 4px solid #1A5276;
   border-radius: 12px;
   padding: 1rem 1.1rem;
   margin-bottom: 1.2rem;
   font-size: .92rem;
-  color: #6B4200;
+  color: #333333;
   line-height: 1.55;
 }
 
 .animaux-alerte-icone {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   flex-shrink: 0;
   line-height: 1;
 }
 
 .animaux-alerte strong {
-  color: #5A3500;
+  color: #1A5276;
   font-weight: 800;
 }
 
@@ -446,13 +489,61 @@ main {
   margin-bottom: .7rem;
 }
 
-/* Note rassurante sous un champ */
+/* Note rassurante sous un champ — Fiche #04 : contraste amélioré */
 .champ-note {
   font-size: 0.75rem;
-  color: var(--texte-doux);
+  color: #595959;
   font-style: italic;
   margin-top: 0.35rem;
   line-height: 1.5;
+}
+
+/* ============================================================
+   STEPPER — Fiche #02
+   ============================================================ */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: .2rem;
+}
+
+.stepper-btn {
+  background: #2D8B3E;
+  color: #fff;
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition), transform var(--transition);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  background: #1F6B2E;
+  transform: scale(1.08);
+}
+
+.stepper-btn:disabled {
+  background: #B0C4B0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.stepper-val {
+  min-width: 52px;
+  text-align: center;
+  font-family: 'Nunito', Verdana, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--texte);
 }
 
 /* Newsletter */
@@ -483,12 +574,37 @@ main {
   cursor: pointer;
 }
 
-/* RGPD */
+/* RGPD — Accordéon Fiche #06 */
 .rgpd-bloc {
-  background: #F5F5F5;
+  margin-bottom: 1rem;
+}
+
+.rgpd-summary {
+  background: #F0F7F0;
+  border-left: 3px solid #2D8B3E;
   border-radius: 8px;
   padding: .75rem 1rem;
-  margin-bottom: 1.1rem;
+  font-size: 0.82rem;
+  color: #444;
+  line-height: 1.65;
+}
+
+.rgpd-toggle {
+  display: inline-block;
+  margin-top: .3rem;
+  color: #1F6B2E;
+  text-decoration: underline;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.rgpd-toggle:hover {
+  color: #164F22;
+}
+
+.rgpd-full {
+  padding: .6rem 0 0;
 }
 
 .rgpd-titre {
@@ -511,11 +627,27 @@ main {
   text-decoration: underline;
 }
 
-.form-actions {
-  display: flex;
-  gap: .8rem;
-  margin-top: 1.5rem;
-  flex-wrap: wrap;
+/* Bouton confirmer — Fiche #07 */
+.form-confirm {
+  margin-bottom: 1.1rem;
+}
+
+.btn-confirmer-full {
+  width: 100%;
+  font-size: 1.125rem; /* 18px */
+  padding: 16px 32px;
+  background: #1F6B2E;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(31, 107, 46, 0.3);
+}
+
+.btn-confirmer-full:hover:not(:disabled) {
+  background: #164F22;
+  box-shadow: 0 6px 20px rgba(31, 107, 46, 0.4);
+}
+
+.form-actions-retour {
+  margin-top: .9rem;
 }
 
 /* ============================================================

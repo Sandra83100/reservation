@@ -15,6 +15,7 @@
     <div class="header-inner">
       <h1>🌿 Nos ateliers</h1>
       <p class="subtitle">Venez vivre une expérience unique au cœur de la nature — réservez votre place en quelques clics !</p>
+      <p class="header-gratuit">🎟 Ateliers gratuits &nbsp;·&nbsp; 🌿 Entrée libre</p>
     </div>
   </header>
 
@@ -69,7 +70,7 @@
         <div id="section-animaux" class="section-animaux hidden">
 
           <div class="animaux-alerte">
-            <span class="animaux-alerte-icone">👨‍👧</span>
+            <span class="animaux-alerte-icone">ℹ️</span>
             <div>
               <strong>Un adulte accompagnant est obligatoire</strong> pour chaque session.<br>
               L'adulte sera compté dans les places réservées.
@@ -77,14 +78,14 @@
           </div>
 
           <div class="champ">
-            <label for="nb-enfants">Nombre d'enfants <span class="obligatoire">*</span></label>
-            <select id="nb-enfants" name="nbEnfants">
-              <option value="">-- Choisir --</option>
-              <option value="1">1 enfant</option>
-              <option value="2">2 enfants</option>
-              <option value="3">3 enfants</option>
-              <option value="4">4 enfants</option>
-            </select>
+            <label>Nombre d'enfants <span class="obligatoire">*</span></label>
+            <div class="stepper" id="stepper-nb-enfants">
+              <button type="button" class="stepper-btn" id="stepper-moins" disabled>−</button>
+              <span class="stepper-val" id="nb-enfants-val">1</span>
+              <button type="button" class="stepper-btn" id="stepper-plus">+</button>
+            </div>
+            <input type="hidden" id="nb-enfants" name="nbEnfants" value="1" />
+            <p class="champ-note">L'adulte accompagnant compte pour 1 place.</p>
             <span class="erreur-champ" id="erreur-nb-enfants"></span>
           </div>
 
@@ -95,29 +96,40 @@
         <div class="newsletter-bloc">
           <label class="newsletter-label">
             <input type="checkbox" id="newsletter" name="newsletter" value="oui" />
-            <span>Je souhaite m'abonner à la newsletter de l'Écoferme pour recevoir les actualités et les événements <em>(lancement prévu à l'été 2026)</em>. 🌿</span>
+            <span>Oui, je veux être prévenu(e) dès l'ouverture de la newsletter (été 2026). 🌿</span>
           </label>
         </div>
 
-        <div class="rgpd-bloc">
-          <p class="rgpd-titre">🔒 Confidentialité & RGPD</p>
-          <p class="rgpd-texte">
-            Vos données personnelles (prénom, email, téléphone) sont collectées
-            <strong>uniquement pour la gestion de votre réservation d'atelier</strong> et ne seront
-            pas transmises à des tiers. Conformément au <strong>Règlement Général sur la Protection
-            des Données (RGPD – UE 2016/679)</strong> et à la loi Informatique et Libertés,
-            vous disposez d'un droit d'accès, de rectification, de limitation et de suppression de
-            vos données. Vos informations seront <strong>conservées pendant 3 ans</strong>, puis supprimées.
-            Pour exercer vos droits, contactez-nous à <a href="mailto:ecoferme@var.fr" class="rgpd-lien">ecoferme@var.fr</a>.
-          </p>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" id="btn-annuler" class="btn-secondaire">← Retour aux ateliers</button>
-          <button type="submit" id="btn-confirmer" class="btn-principal">
+        <!-- Bouton confirmer — positionné avant le RGPD (Fiche #07) -->
+        <div class="form-confirm">
+          <button type="submit" id="btn-confirmer" class="btn-principal btn-confirmer-full">
             <span id="btn-confirmer-texte">Confirmer ma réservation</span>
             <span id="btn-confirmer-loader" class="hidden">⏳ Envoi en cours…</span>
           </button>
+        </div>
+
+        <!-- RGPD en accordéon dépliable (Fiche #06) -->
+        <div class="rgpd-bloc">
+          <div class="rgpd-summary">
+            🔒 Vos données sont utilisées uniquement pour votre réservation et ne sont jamais transmises à des tiers.
+            <br><a href="#" class="rgpd-toggle" id="toggle-rgpd">En savoir plus sur vos données ▾</a>
+          </div>
+          <div class="rgpd-full hidden" id="rgpd-full">
+            <p class="rgpd-titre">🔒 Confidentialité & RGPD</p>
+            <p class="rgpd-texte">
+              Vos données personnelles (prénom, email, téléphone) sont collectées
+              <strong>uniquement pour la gestion de votre réservation d'atelier</strong> et ne seront
+              pas transmises à des tiers. Conformément au <strong>Règlement Général sur la Protection
+              des Données (RGPD – UE 2016/679)</strong> et à la loi Informatique et Libertés,
+              vous disposez d'un droit d'accès, de rectification, de limitation et de suppression de
+              vos données. Vos informations seront <strong>conservées pendant 3 ans</strong>, puis supprimées.
+              Pour exercer vos droits, contactez-nous à <a href="mailto:ecoferme@var.fr" class="rgpd-lien">ecoferme@var.fr</a>.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-actions-retour">
+          <button type="button" id="btn-annuler" class="btn-secondaire">← Retour aux ateliers</button>
         </div>
 
       </form>
