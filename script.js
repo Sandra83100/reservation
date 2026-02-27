@@ -20,6 +20,17 @@ const CONFIG_ATELIERS = {
 };
 
 // ============================================================
+//  DONNÉES DE TEST (utilisées automatiquement en local)
+// ============================================================
+const DONNEES_TEST = [
+  { id: 1, nom: 'Rencontre avec les animaux',      date: '15/03/2026', debut: '10:00', fin: '12:00', placesMax: 8,  placesRestantes: 5 },
+  { id: 2, nom: 'Rencontre avec les animaux',      date: '22/03/2026', debut: '10:00', fin: '12:00', placesMax: 8,  placesRestantes: 2 },
+  { id: 3, nom: "Mémoires de l'écoferme",          date: '18/03/2026', debut: '14:00', fin: '16:30', placesMax: 10, placesRestantes: 10 },
+  { id: 4, nom: "Visite découverte de l'Écoferme", date: '20/03/2026', debut: '09:30', fin: '11:30', placesMax: 12, placesRestantes: 0 },
+  { id: 5, nom: "Visite découverte de l'Écoferme", date: '27/03/2026', debut: '09:30', fin: '11:30', placesMax: 12, placesRestantes: 7 },
+];
+
+// ============================================================
 //  ÉTAT GLOBAL
 // ============================================================
 let ateliers = [];
@@ -60,9 +71,16 @@ async function chargerAteliers() {
     ateliers = data;
     renderCartes();
   } catch (err) {
-    console.error('Erreur chargement ateliers :', err);
-    afficherErreurGlobale('Impossible de charger les ateliers. Vérifiez votre connexion.');
-    renderCartes();
+    const estEnLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+    if (estEnLocal) {
+      console.warn('API indisponible en local → données de test chargées.');
+      ateliers = DONNEES_TEST;
+      renderCartes();
+    } else {
+      console.error('Erreur chargement ateliers :', err);
+      afficherErreurGlobale('Impossible de charger les ateliers. Vérifiez votre connexion.');
+      renderCartes();
+    }
   } finally {
     afficherLoader(false);
   }
@@ -186,12 +204,12 @@ function ouvrirFormulaire(atelier) {
 async function soumettreReservation(e) {
   e.preventDefault();
 
-  const nom   = document.getElementById('nom').value.trim();
+  const nom   = document.getElementById('prenom').value.trim();
   const email = document.getElementById('email').value.trim();
   const tel   = document.getElementById('tel').value.trim();
 
   let valide = true;
-  if (!nom)                     { afficherErreurChamp('nom',   'Veuillez saisir votre nom et prénom.'); valide = false; }
+  if (!nom)                     { afficherErreurChamp('prenom', 'Veuillez saisir votre prénom.'); valide = false; }
   if (!email || !isEmailValide(email)) { afficherErreurChamp('email', 'Adresse email invalide.'); valide = false; }
   if (!tel)                     { afficherErreurChamp('tel',   'Veuillez saisir votre téléphone.'); valide = false; }
   if (!valide) return;
@@ -273,7 +291,7 @@ function afficherErreurChamp(champ, msg) {
 }
 
 function effacerErreurs() {
-  ['nom', 'email', 'tel'].forEach(id => {
+  ['prenom', 'email', 'tel'].forEach(id => {
     document.getElementById(id).classList.remove('invalide');
     document.getElementById(`erreur-${id}`).textContent = '';
   });
