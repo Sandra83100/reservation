@@ -318,6 +318,16 @@ function appliquerZebrage(sheet, rowIndex) {
 //  EMAIL DE CONFIRMATION
 // ============================================================
 
+/** Échappe les caractères HTML pour éviter les injections dans l'email */
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function envoyerEmailConfirmation(email, nom, atelier) {
   try {
     const sujet = `✅ Confirmation — ${atelier.nom} le ${atelier.date}`;
