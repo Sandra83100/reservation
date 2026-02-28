@@ -41,6 +41,21 @@ function formatDate(d) {
   return `${dd}/${mm}/${yyyy}`;
 }
 
+/** Convertit "DD/MM/YYYY" en "Mercredi 4 mars 2026" */
+function formatDateLisible(dateStr) {
+  if (!dateStr) return dateStr;
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return dateStr;
+  const dd = parseInt(parts[0], 10);
+  const mm = parseInt(parts[1], 10);
+  const yyyy = parseInt(parts[2], 10);
+  const date = new Date(yyyy, mm - 1, dd);
+  const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  const mois  = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]} ${yyyy}`;
+}
+
 /** Formate une valeur heure (peut être un objet Date ou une string "HH:MM") */
 function formatTime(val) {
   if (!val && val !== 0) return '';
@@ -132,7 +147,7 @@ function doPost(e) {
     }
 
     const body = JSON.parse(e.postData.contents);
-    const { atelierId, nom, email, tel } = body;
+    const { atelierId, nom, email, tel, nbPersonnes, agesEnfants } = body;
 
     // --- Validation des champs ---
     if (!atelierId || !nom || !email || !tel) {
@@ -186,7 +201,7 @@ function doPost(e) {
     appliquerZebrage(sheet, sheet.getLastRow());
 
     // --- Email de confirmation au participant ---
-    envoyerEmailConfirmation(email, nom, atelier);
+    envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants);
 
     return jsonResponse({
       success: true,
@@ -328,9 +343,45 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-function envoyerEmailConfirmation(email, nom, atelier) {
+function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants) {
   try {
-    const sujet = `✅ Confirmation — ${atelier.nom} le ${atelier.date}`;
+    const dateLisible = formatDateLisible(atelier.date);
+    const sujet = `✅ Confirmation — ${atelier.nom} le ${dateLisible}`;
+
+    // --- Bloc participants ---
+    const NOM_ANIMAUX = 'Rencontre avec les animaux';
+    const labelsAge = {
+      'moins-3ans': 'Moins de 3 ans',
+      '3-10ans':    '3 à 10 ans',
+      'plus-10ans': 'Plus de 10 ans'
+    };
+
+    let participantsHtml = '';
+    if (atelier.nom === NOM_ANIMAUX && agesEnfants && agesEnfants.length > 0) {
+      const nbEnfants = agesEnfants.length;
+      const lignesAges = agesEnfants
+        .map((a, i) => `Enfant ${i + 1} : ${labelsAge[a] || a}`)
+        .join('<br>');
+      participantsHtml = `
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#e8f5e9;border-left:4px solid #3a6b35;border-radius:4px;margin-bottom:25px;">
+          <tr>
+            <td style="padding:15px 20px;font-size:15px;color:#333;">
+              <strong>Participants réservés :</strong><br>
+              1 adulte et ${nbEnfants} enfant${nbEnfants > 1 ? 's' : ''}<br>
+              <span style="color:#555;">${lignesAges}</span>
+            </td>
+          </tr>
+        </table>`;
+    } else if (nbPersonnes && nbPersonnes > 0) {
+      participantsHtml = `
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#e8f5e9;border-left:4px solid #3a6b35;border-radius:4px;margin-bottom:25px;">
+          <tr>
+            <td style="padding:15px 20px;font-size:15px;color:#333;">
+              <strong>Participants réservés :</strong> ${nbPersonnes} place${nbPersonnes > 1 ? 's' : ''}
+            </td>
+          </tr>
+        </table>`;
+    }
 
     const corps = `
 <!DOCTYPE html>
@@ -353,26 +404,38 @@ function envoyerEmailConfirmation(email, nom, atelier) {
           <td style="padding:35px 40px;">
             <p style="margin:0 0 20px;font-size:16px;color:#333;">Bonjour <strong>${escapeHtml(nom)}</strong>,</p>
             <p style="margin:0 0 25px;font-size:16px;color:#333;line-height:1.6;">
-              Votre place est bien réservée. Nous avons hâte de vous accueillir !
+              Votre réservation est bien confirmée. Nous avons hâte de vous accueillir !
             </p>
 
             <!-- Récap atelier -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f8e9;border-left:4px solid #3a6b35;border-radius:4px;margin-bottom:30px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f8e9;border-left:4px solid #3a6b35;border-radius:4px;margin-bottom:20px;">
               <tr>
                 <td style="padding:20px 25px;">
                   <p style="margin:0 0 8px;font-size:18px;color:#2e5a2a;font-weight:bold;">${escapeHtml(atelier.nom)}</p>
-                  <p style="margin:0 0 5px;font-size:15px;color:#555;">📅 &nbsp;${atelier.date}</p>
+                  <p style="margin:0 0 5px;font-size:15px;color:#555;">📅 &nbsp;${dateLisible}</p>
                   <p style="margin:0;font-size:15px;color:#555;">🕐 &nbsp;${atelier.debut} – ${atelier.fin}</p>
                 </td>
               </tr>
             </table>
 
+            <!-- Participants -->
+            ${participantsHtml}
+
+            <!-- Contact -->
             <p style="margin:0 0 10px;font-size:15px;color:#555;line-height:1.6;">
-              En cas de question ou si vous souhaitez annuler, répondez simplement à cet email.
+              Pour toute question, n'hésitez pas à nous contacter par téléphone au <strong>04 98 00 95 70</strong> ou par mail à <a href="mailto:ecoferme@var.fr" style="color:#3a6b35;text-decoration:underline;">ecoferme@var.fr</a>.
             </p>
-            <p style="margin:0;font-size:15px;color:#555;line-height:1.6;">
+            <p style="margin:0 0 25px;font-size:15px;color:#555;line-height:1.6;">
+              Pour que chacun puisse profiter de ce beau moment, pensez à nous prévenir par téléphone ou par mail si vous ne pouvez finalement pas venir — une autre famille sera ravie de prendre votre place !
+            </p>
+
+            <!-- Signature -->
+            <p style="margin:0;font-size:15px;color:#555;line-height:1.8;">
               À très bientôt,<br>
-              <strong style="color:#3a6b35;">L'équipe de l'Écoferme</strong>
+              <strong style="color:#3a6b35;">L'équipe de l'Écoferme</strong><br>
+              📞 04 98 00 95 70<br>
+              📍 55, allée Georges Legg, 83000 Toulon<br>
+              <a href="https://www.facebook.com/ecofermedepartementaledelabarre" style="color:#3a6b35;text-decoration:underline;">Notre page Facebook</a>
             </p>
           </td>
         </tr>
@@ -391,8 +454,8 @@ function envoyerEmailConfirmation(email, nom, atelier) {
 </html>`;
 
     MailApp.sendEmail({
-      to:      email,
-      subject: sujet,
+      to:       email,
+      subject:  sujet,
       htmlBody: corps
     });
 

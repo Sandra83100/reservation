@@ -85,7 +85,7 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 ## État du déploiement (28 février 2026)
 
 - **GitHub Pages** : https://sandra83100.github.io/reservation/ (branche `main`)
-- **Apps Script** : Version 10 déployée — MailApp autorisée, emails de confirmation opérationnels
+- **Apps Script** : Version 11 déployée — email amélioré (date lisible, participants, contact, signature)
 - **Nom du projet Apps Script** : "Réservation Ateliers Écoferme" (renommé depuis "Projet sans titre")
 - **Branche unique** : tout le travail est sur `main`, les autres branches (`lucid-dubinsky`, `musing-dirac`) sont obsolètes
 
@@ -116,6 +116,9 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 - [x] **Déploiement GitHub Pages** : https://sandra83100.github.io/reservation/ (branche main)
 - [x] SHEET_ID défini dans Code.gs : `1x6_cgQwlZaY6p8wAr6_VtGjdRiuEjWpnMWvUAh-Rh1k`
 - [x] Projet Apps Script renommé : "Réservation Ateliers Écoferme"
+- [x] **Email v11** : date lisible ("Mercredi 4 mars 2026"), participants (adulte + enfants avec âges pour Rencontre animaux, nb places pour autres), contact téléphone + mailto, phrase "pensez à nous prévenir", signature avec 📞 04 98 00 95 70, 📍 55 allée Georges Legg 83000 Toulon, lien Facebook
+- [x] `formatDateLisible()` dans Code.gs : convertit "DD/MM/YYYY" → "Mercredi 4 mars 2026"
+- [x] `doPost()` extrait `nbPersonnes` et `agesEnfants` et les passe à `envoyerEmailConfirmation()`
 
 ---
 
