@@ -85,7 +85,7 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 ## État du déploiement (28 février 2026)
 
 - **GitHub Pages** : https://sandra83100.github.io/reservation/ (branche `main`)
-- **Apps Script** : Version 9 déployée — fix CORS + escapeHtml ajouté dans Code.gs
+- **Apps Script** : Version 10 déployée — MailApp autorisée, emails de confirmation opérationnels
 - **Branche unique** : tout le travail est sur `main`, les autres branches (`lucid-dubinsky`, `musing-dirac`) sont obsolètes
 
 ---
@@ -105,6 +105,7 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 - [x] Soumission POST vers Apps Script
 - [x] Mise à jour optimiste du compteur local après réservation
 - [x] **Confirmation par email** HTML automatique (style Écoferme vert) via MailApp
+- [x] **Autorisation MailApp** accordée — emails envoyés automatiquement après chaque réservation
 - [x] **Anti-doublon** : même email ne peut pas réserver deux fois le même atelier
 - [x] Code.gs : doGet (liste ateliers + places restantes), doPost (enregistrement réservation)
 - [x] Code.gs : initialiserSheet() pour créer les onglets avec mise en forme
@@ -118,7 +119,6 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 
 ## Points d'attention / À faire
 
-- [ ] **Autorisation MailApp** : la première vraie réservation déclenchera une demande d'autorisation Google — Sandra doit l'accepter dans Apps Script
 - [ ] **Photos et descriptions réelles** à remplacer (actuellement : picsum.photos + Lorem ipsum)
 - [ ] **Badge places** : affiche "8/8 places" même quand tout est dispo — envisager de masquer ou reformuler quand toutes les places sont libres (ex: "Places disponibles")
 - [ ] Pas d'admin pour gérer les ateliers depuis le site (tout passe par Google Sheets directement)
