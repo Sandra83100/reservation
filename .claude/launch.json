@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "site-ateliers",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-p", "3000", "--no-cache", "/Users/sandramarino/reservation-ateliers"],
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": ["-m", "http.server", "3000", "--directory", "/Users/sandramarino/reservation-ateliers"],
       "port": 3000
     }
   ]
