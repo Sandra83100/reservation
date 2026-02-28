@@ -152,6 +152,17 @@ function doPost(e) {
       return jsonResponse({ error: 'Cet atelier est complet.' });
     }
 
+    // --- Protection anti-doublon ---
+    const sheetResaCheck = getSheet(ONGLET_RESERVATIONS);
+    const resasExistantes = sheetToObjects(sheetResaCheck);
+    const dejaInscrit = resasExistantes.some(r =>
+      r['Email'] && r['Email'].toString().toLowerCase().trim() === email.toLowerCase().trim() &&
+      String(r['ID Atelier']) === String(atelierId)
+    );
+    if (dejaInscrit) {
+      return jsonResponse({ error: 'Cette adresse email est déjà inscrite à cet atelier.' });
+    }
+
     // --- Écriture dans l'onglet Réservations ---
     const sheet   = getSheet(ONGLET_RESERVATIONS);
     const lastRow = sheet.getLastRow();
@@ -173,6 +184,9 @@ function doPost(e) {
 
     // Applique le zébrage sur la nouvelle ligne
     appliquerZebrage(sheet, sheet.getLastRow());
+
+    // --- Email de confirmation au participant ---
+    envoyerEmailConfirmation(email, nom, atelier);
 
     return jsonResponse({
       success: true,
@@ -298,6 +312,84 @@ function appliquerZebrage(sheet, rowIndex) {
   const couleur  = rowIndex % 2 === 0 ? '#F1F8E9' : '#FFFFFF';
   range.setBackground(couleur);
   range.setBorder(true, true, true, true, true, true);
+}
+
+// ============================================================
+//  EMAIL DE CONFIRMATION
+// ============================================================
+
+function envoyerEmailConfirmation(email, nom, atelier) {
+  try {
+    const sujet = `✅ Confirmation — ${atelier.nom} le ${atelier.date}`;
+
+    const corps = `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f4f7f0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7f0;padding:30px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+
+        <!-- En-tête -->
+        <tr>
+          <td style="background:#3a6b35;padding:30px 40px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:normal;">🌿 Réservation confirmée</h1>
+          </td>
+        </tr>
+
+        <!-- Corps -->
+        <tr>
+          <td style="padding:35px 40px;">
+            <p style="margin:0 0 20px;font-size:16px;color:#333;">Bonjour <strong>${escapeHtml(nom)}</strong>,</p>
+            <p style="margin:0 0 25px;font-size:16px;color:#333;line-height:1.6;">
+              Votre place est bien réservée. Nous avons hâte de vous accueillir !
+            </p>
+
+            <!-- Récap atelier -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f8e9;border-left:4px solid #3a6b35;border-radius:4px;margin-bottom:30px;">
+              <tr>
+                <td style="padding:20px 25px;">
+                  <p style="margin:0 0 8px;font-size:18px;color:#2e5a2a;font-weight:bold;">${escapeHtml(atelier.nom)}</p>
+                  <p style="margin:0 0 5px;font-size:15px;color:#555;">📅 &nbsp;${atelier.date}</p>
+                  <p style="margin:0;font-size:15px;color:#555;">🕐 &nbsp;${atelier.debut} – ${atelier.fin}</p>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:0 0 10px;font-size:15px;color:#555;line-height:1.6;">
+              En cas de question ou si vous souhaitez annuler, répondez simplement à cet email.
+            </p>
+            <p style="margin:0;font-size:15px;color:#555;line-height:1.6;">
+              À très bientôt,<br>
+              <strong style="color:#3a6b35;">L'équipe de l'Écoferme</strong>
+            </p>
+          </td>
+        </tr>
+
+        <!-- Pied de page -->
+        <tr>
+          <td style="background:#f4f7f0;padding:15px 40px;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#999;">Cet email a été envoyé automatiquement suite à votre réservation.</p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+    MailApp.sendEmail({
+      to:      email,
+      subject: sujet,
+      htmlBody: corps
+    });
+
+  } catch (err) {
+    // L'email échoue silencieusement — la réservation reste enregistrée
+    console.error('Erreur envoi email :', err.message);
+  }
 }
 
 // ============================================================
