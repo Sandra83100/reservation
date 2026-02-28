@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Réservation d'ateliers – Écoferme</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,6 +15,7 @@
     <div class="header-inner">
       <h1>🌿 Nos ateliers</h1>
       <p class="subtitle">Venez vivre une expérience unique au cœur de la nature — réservez votre place en quelques clics !</p>
+      <p class="header-gratuit">🎟 Ateliers gratuits &nbsp;·&nbsp; 🌿 Entrée libre</p>
     </div>
   </header>
 
@@ -47,11 +51,12 @@
           <label for="tel">Téléphone <span class="obligatoire">*</span></label>
           <input type="tel" id="tel" name="tel" placeholder="ex : 06 12 34 56 78" required autocomplete="tel" />
           <span class="erreur-champ" id="erreur-tel"></span>
+          <p class="champ-note">📞 Votre numéro ne nous servira qu'à vous prévenir si l'atelier devait être annulé ou modifié — jamais à autre chose.</p>
         </div>
 
-        <div class="champ">
+        <div id="champ-nb-personnes" class="champ">
           <label for="nb-personnes">Nombre de participants <span class="obligatoire">*</span></label>
-          <select id="nb-personnes" name="nbPersonnes" required>
+          <select id="nb-personnes" name="nbPersonnes">
             <option value="">-- Choisir --</option>
             <option value="1">1 personne</option>
             <option value="2">2 personnes</option>
@@ -61,25 +66,70 @@
           <span class="erreur-champ" id="erreur-nb-personnes"></span>
         </div>
 
-        <div class="rgpd-bloc">
-          <p class="rgpd-titre">🔒 Confidentialité & RGPD</p>
-          <p class="rgpd-texte">
-            Vos données personnelles (prénom, email, téléphone) sont collectées
-            <strong>uniquement pour la gestion de votre réservation d'atelier</strong> et ne seront
-            pas transmises à des tiers. Conformément au <strong>Règlement Général sur la Protection
-            des Données (RGPD – UE 2016/679)</strong> et à la loi Informatique et Libertés,
-            vous disposez d'un droit d'accès, de rectification, de limitation et de suppression de
-            vos données. Vos informations seront conservées pour la durée nécessaire à l'organisation
-            de l'atelier, puis supprimées. Pour exercer vos droits, contactez-nous directement.
-          </p>
+        <!-- ── Section spécifique : Rencontre avec les animaux ── -->
+        <div id="section-animaux" class="section-animaux hidden">
+
+          <div class="animaux-alerte">
+            <span class="animaux-alerte-icone">ℹ️</span>
+            <div>
+              <strong>Un adulte accompagnant est obligatoire</strong> pour chaque session.<br>
+              L'adulte sera compté dans les places réservées.
+            </div>
+          </div>
+
+          <div class="champ">
+            <label>Nombre d'enfants <span class="obligatoire">*</span></label>
+            <div class="stepper" id="stepper-nb-enfants">
+              <button type="button" class="stepper-btn" id="stepper-moins" disabled>−</button>
+              <span class="stepper-val" id="nb-enfants-val">1</span>
+              <button type="button" class="stepper-btn" id="stepper-plus">+</button>
+            </div>
+            <input type="hidden" id="nb-enfants" name="nbEnfants" value="1" />
+            <p class="champ-note">L'adulte accompagnant compte pour 1 place.</p>
+            <span class="erreur-champ" id="erreur-nb-enfants"></span>
+          </div>
+
+          <div id="ages-enfants" class="ages-enfants"></div>
+
         </div>
 
-        <div class="form-actions">
-          <button type="button" id="btn-annuler" class="btn-secondaire">← Retour aux ateliers</button>
-          <button type="submit" id="btn-confirmer" class="btn-principal">
+        <div class="newsletter-bloc">
+          <label class="newsletter-label">
+            <input type="checkbox" id="newsletter" name="newsletter" value="oui" />
+            <span>Oui, je veux être prévenu(e) dès l'ouverture de la newsletter (été 2026). 🌿</span>
+          </label>
+        </div>
+
+        <!-- Bouton confirmer — positionné avant le RGPD (Fiche #07) -->
+        <div class="form-confirm">
+          <button type="submit" id="btn-confirmer" class="btn-principal btn-confirmer-full">
             <span id="btn-confirmer-texte">Confirmer ma réservation</span>
             <span id="btn-confirmer-loader" class="hidden">⏳ Envoi en cours…</span>
           </button>
+        </div>
+
+        <!-- RGPD en accordéon dépliable (Fiche #06) -->
+        <div class="rgpd-bloc">
+          <div class="rgpd-summary">
+            🔒 Vos données sont utilisées uniquement pour votre réservation et ne sont jamais transmises à des tiers.
+            <br><a href="#" class="rgpd-toggle" id="toggle-rgpd">En savoir plus sur vos données ▾</a>
+          </div>
+          <div class="rgpd-full hidden" id="rgpd-full">
+            <p class="rgpd-titre">🔒 Confidentialité & RGPD</p>
+            <p class="rgpd-texte">
+              Vos données personnelles (prénom, email, téléphone) sont collectées
+              <strong>uniquement pour la gestion de votre réservation d'atelier</strong> et ne seront
+              pas transmises à des tiers. Conformément au <strong>Règlement Général sur la Protection
+              des Données (RGPD – UE 2016/679)</strong> et à la loi Informatique et Libertés,
+              vous disposez d'un droit d'accès, de rectification, de limitation et de suppression de
+              vos données. Vos informations seront <strong>conservées pendant 3 ans</strong>, puis supprimées.
+              Pour exercer vos droits, contactez-nous à <a href="mailto:ecoferme@var.fr" class="rgpd-lien">ecoferme@var.fr</a>.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-actions-retour">
+          <button type="button" id="btn-annuler" class="btn-secondaire">← Retour aux ateliers</button>
         </div>
 
       </form>

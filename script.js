@@ -3,21 +3,36 @@
 // ============================================================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXsam9kpgaGdwVbf0LYkqBpgFayk9dexy6y2CyeSvwVqvWB-SMGbrDF5Hn4m2AJKoB/exec';
 
-// Config visuelle par type d'atelier (photo + description)
+// Config visuelle par type d'atelier (photo + description + prix)
+// prix: null = gratuit, chaîne = montant affiché (ex: '5 €/enfant')
 const CONFIG_ATELIERS = {
   'Rencontre avec les animaux': {
     photo: 'https://picsum.photos/seed/animaux42/700/400',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.'
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.',
+    prix: null // Gratuit
   },
   'Mémoires de l\'écoferme': {
     photo: 'https://picsum.photos/seed/ferme77/700/400',
-    description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.'
+    description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.',
+    prix: null // Gratuit
   },
   'Visite découverte de l\'Écoferme': {
     photo: 'https://picsum.photos/seed/ecoferme33/700/400',
-    description: 'Ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.'
+    description: 'Ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.',
+    prix: null // Gratuit
   }
 };
+
+// ============================================================
+//  DONNÉES DE TEST (utilisées automatiquement en local)
+// ============================================================
+const DONNEES_TEST = [
+  { id: 1, nom: 'Rencontre avec les animaux',      date: '15/03/2026', debut: '10:00', fin: '12:00', placesMax: 8,  placesRestantes: 5 },
+  { id: 2, nom: 'Rencontre avec les animaux',      date: '22/03/2026', debut: '10:00', fin: '12:00', placesMax: 8,  placesRestantes: 2 },
+  { id: 3, nom: "Mémoires de l'écoferme",          date: '18/03/2026', debut: '14:00', fin: '16:30', placesMax: 10, placesRestantes: 10 },
+  { id: 4, nom: "Visite découverte de l'Écoferme", date: '20/03/2026', debut: '09:30', fin: '11:30', placesMax: 12, placesRestantes: 0 },
+  { id: 5, nom: "Visite découverte de l'Écoferme", date: '27/03/2026', debut: '09:30', fin: '11:30', placesMax: 12, placesRestantes: 7 },
+];
 
 // ============================================================
 //  ÉTAT GLOBAL
@@ -44,6 +59,16 @@ function bindEvents() {
     chargerAteliers();
   });
   document.getElementById('form-reservation').addEventListener('submit', soumettreReservation);
+
+  // Stepper enfants (Fiche #02)
+  document.getElementById('stepper-moins').addEventListener('click', () => changerNbEnfants(-1));
+  document.getElementById('stepper-plus').addEventListener('click',  () => changerNbEnfants(+1));
+
+  // Accordéon RGPD (Fiche #06)
+  document.getElementById('toggle-rgpd').addEventListener('click', (e) => {
+    e.preventDefault();
+    toggleRgpd();
+  });
 }
 
 // ============================================================
@@ -60,9 +85,16 @@ async function chargerAteliers() {
     ateliers = data;
     renderCartes();
   } catch (err) {
-    console.error('Erreur chargement ateliers :', err);
-    afficherErreurGlobale('Impossible de charger les ateliers. Vérifiez votre connexion.');
-    renderCartes();
+    const estEnLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+    if (estEnLocal) {
+      console.warn('API indisponible en local → données de test chargées.');
+      ateliers = DONNEES_TEST;
+      renderCartes();
+    } else {
+      console.error('Erreur chargement ateliers :', err);
+      afficherErreurGlobale('Impossible de charger les ateliers. Vérifiez votre connexion.');
+      renderCartes();
+    }
   } finally {
     afficherLoader(false);
   }
@@ -108,15 +140,23 @@ function renderCartes() {
     const carte = document.createElement('article');
     carte.className = 'carte-atelier';
 
+    // Badge prix — Fiche #01
+    const badgePrix = cfg.prix
+      ? `<span class="carte-badge-prix payant">💶 ${escapeHtml(cfg.prix)}</span>`
+      : `<span class="carte-badge-prix">🎟 Gratuit</span>`;
+
     carte.innerHTML = `
       <div class="carte-photo">
         <img src="${cfg.photo}" alt="${escapeHtml(nom)}" loading="lazy" />
-        <span class="carte-badge">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
-            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-          </svg>
-          ${placesMax} places
-        </span>
+        <div class="carte-badges">
+          <span class="carte-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            </svg>
+            ${placesMax} places
+          </span>
+          ${badgePrix}
+        </div>
       </div>
       <div class="carte-corps">
         <h2 class="carte-titre">${escapeHtml(nom)}</h2>
@@ -156,19 +196,21 @@ function renderCartes() {
   });
 }
 
-/** Convertit "DD/MM/YYYY" en "Mer. 4 mars" */
+/** Convertit "DD/MM/YYYY" en "Mercredi 4 mars" */
 function formatDateLisible(dateStr) {
   const [dd, mm, yyyy] = dateStr.split('/');
   const date = new Date(yyyy, mm - 1, dd);
-  const jours = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
-  const mois  = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
-                  'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  const mois  = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                  'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]}`;
 }
 
 // ============================================================
 //  FORMULAIRE
 // ============================================================
+const NOM_ATELIER_ANIMAUX = 'Rencontre avec les animaux';
+
 function ouvrirFormulaire(atelier) {
   atelierSelectionne = atelier;
 
@@ -180,21 +222,133 @@ function ouvrirFormulaire(atelier) {
 
   document.getElementById('form-reservation').reset();
   effacerErreurs();
+
+  // Afficher la section adaptée selon l'atelier
+  const estAnimaux = atelier.nom === NOM_ATELIER_ANIMAUX;
+  document.getElementById('champ-nb-personnes').classList.toggle('hidden', estAnimaux);
+  document.getElementById('section-animaux').classList.toggle('hidden', !estAnimaux);
+  document.getElementById('ages-enfants').innerHTML = '';
+
+  // Initialiser le stepper enfants (Fiche #02)
+  if (estAnimaux) {
+    document.getElementById('nb-enfants').value = '1';
+    document.getElementById('nb-enfants-val').textContent = '1';
+    document.getElementById('stepper-moins').disabled = true;
+    document.getElementById('stepper-plus').disabled = false;
+    genererAgesEnfants();
+  }
+
+  // Refermer l'accordéon RGPD à chaque ouverture du formulaire
+  document.getElementById('rgpd-full').classList.add('hidden');
+  document.getElementById('toggle-rgpd').textContent = 'En savoir plus sur vos données ▾';
+
   afficherSection('formulaire');
+}
+
+// ============================================================
+//  STEPPER NOMBRE D'ENFANTS — Fiche #02
+// ============================================================
+const STEPPER_MIN = 1;
+const STEPPER_MAX = 7; // 1 adulte obligatoire + 7 enfants max = 8 places max
+
+function changerNbEnfants(delta) {
+  const input  = document.getElementById('nb-enfants');
+  const valAff = document.getElementById('nb-enfants-val');
+  let val = parseInt(input.value) || STEPPER_MIN;
+  val = Math.min(STEPPER_MAX, Math.max(STEPPER_MIN, val + delta));
+  input.value = String(val);
+  valAff.textContent = val;
+  document.getElementById('stepper-moins').disabled = (val <= STEPPER_MIN);
+  document.getElementById('stepper-plus').disabled  = (val >= STEPPER_MAX);
+  genererAgesEnfants();
+}
+
+// ============================================================
+//  ACCORDÉON RGPD — Fiche #06
+// ============================================================
+function toggleRgpd() {
+  const full   = document.getElementById('rgpd-full');
+  const toggle = document.getElementById('toggle-rgpd');
+  const isHidden = full.classList.contains('hidden');
+  full.classList.toggle('hidden', !isHidden);
+  toggle.textContent = isHidden
+    ? 'Masquer les détails ▴'
+    : 'En savoir plus sur vos données ▾';
+}
+
+function genererAgesEnfants() {
+  const nb = parseInt(document.getElementById('nb-enfants').value) || 0;
+  const conteneur = document.getElementById('ages-enfants');
+  conteneur.innerHTML = '';
+  for (let i = 1; i <= nb; i++) {
+    const div = document.createElement('div');
+    div.className = 'champ champ-age-enfant';
+    div.innerHTML = `
+      <label for="age-enfant-${i}">
+        Âge de l'enfant ${i} <span class="obligatoire">*</span>
+      </label>
+      <select id="age-enfant-${i}" name="ageEnfant${i}">
+        <option value="">-- Choisir --</option>
+        <option value="moins-3ans">Moins de 3 ans</option>
+        <option value="3-10ans">3 à 10 ans</option>
+        <option value="plus-10ans">Plus de 10 ans</option>
+      </select>
+      <span class="erreur-champ" id="erreur-age-enfant-${i}"></span>
+    `;
+    conteneur.appendChild(div);
+  }
 }
 
 async function soumettreReservation(e) {
   e.preventDefault();
 
-  const nom   = document.getElementById('nom').value.trim();
+  const nom   = document.getElementById('prenom').value.trim();
   const email = document.getElementById('email').value.trim();
   const tel   = document.getElementById('tel').value.trim();
 
   let valide = true;
-  if (!nom)                     { afficherErreurChamp('nom',   'Veuillez saisir votre nom et prénom.'); valide = false; }
-  if (!email || !isEmailValide(email)) { afficherErreurChamp('email', 'Adresse email invalide.'); valide = false; }
-  if (!tel)                     { afficherErreurChamp('tel',   'Veuillez saisir votre téléphone.'); valide = false; }
+  if (!nom)                          { afficherErreurChamp('prenom', 'Veuillez saisir votre prénom.'); valide = false; }
+  if (!email || !isEmailValide(email)) { afficherErreurChamp('email',  'Adresse email invalide.'); valide = false; }
+  if (!tel)                          { afficherErreurChamp('tel',    'Veuillez saisir votre téléphone.'); valide = false; }
+
+  // Calcul du nombre de participants selon l'atelier
+  let nbPersonnes = 0;
+  const estAnimaux = atelierSelectionne.nom === NOM_ATELIER_ANIMAUX;
+
+  if (estAnimaux) {
+    const nbEnfants = parseInt(document.getElementById('nb-enfants').value) || 0;
+    if (!nbEnfants) {
+      afficherErreurChamp('nb-enfants', 'Veuillez indiquer le nombre d\'enfants.');
+      valide = false;
+    } else {
+      // Valider l'âge de chaque enfant
+      for (let i = 1; i <= nbEnfants; i++) {
+        const sel = document.getElementById(`age-enfant-${i}`);
+        if (!sel || !sel.value) {
+          afficherErreurChamp(`age-enfant-${i}`, 'Veuillez indiquer l\'âge de cet enfant.');
+          valide = false;
+        }
+      }
+      nbPersonnes = nbEnfants + 1; // enfants + 1 adulte obligatoire
+    }
+  } else {
+    nbPersonnes = parseInt(document.getElementById('nb-personnes').value) || 0;
+    if (!nbPersonnes) {
+      afficherErreurChamp('nb-personnes', 'Veuillez indiquer le nombre de participants.');
+      valide = false;
+    }
+  }
+
   if (!valide) return;
+
+  // Collecter les âges des enfants si atelier animaux
+  const agesEnfants = [];
+  if (estAnimaux) {
+    const nb = parseInt(document.getElementById('nb-enfants').value);
+    for (let i = 1; i <= nb; i++) {
+      agesEnfants.push(document.getElementById(`age-enfant-${i}`).value);
+    }
+  }
 
   setBoutonConfirmer(true);
 
@@ -202,7 +356,12 @@ async function soumettreReservation(e) {
     const resp = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ atelierId: atelierSelectionne.id, nom, email, tel })
+      body: JSON.stringify({
+        atelierId: atelierSelectionne.id,
+        nom, email, tel,
+        nbPersonnes,
+        ...(estAnimaux && { agesEnfants })
+      })
     });
     const data = await resp.json();
 
@@ -273,7 +432,7 @@ function afficherErreurChamp(champ, msg) {
 }
 
 function effacerErreurs() {
-  ['nom', 'email', 'tel'].forEach(id => {
+  ['prenom', 'email', 'tel'].forEach(id => {
     document.getElementById(id).classList.remove('invalide');
     document.getElementById(`erreur-${id}`).textContent = '';
   });
