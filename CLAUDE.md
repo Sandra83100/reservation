@@ -3,6 +3,8 @@
 > Ce fichier est chargé automatiquement par Claude Code à chaque session.
 > Il contient tout ce qu'il faut savoir pour reprendre le travail immédiatement.
 
+> ⚠️ **RÈGLE ABSOLUE** : Toujours travailler sur la branche **`main`** du dépôt principal (`/Users/sandramarino/reservation-ateliers/`). Ne jamais toucher aux worktrees (`.claude/worktrees/`). Ne jamais déployer une autre branche. `main` = seule source de vérité.
+
 ---
 
 ## Description du projet
@@ -80,7 +82,15 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 
 ---
 
-## Ce qui est fait (état au 22-24 février 2026)
+## État du déploiement (28 février 2026)
+
+- **GitHub Pages** : https://sandra83100.github.io/reservation/ (branche `main`)
+- **Apps Script** : Version 8 déployée — email confirmation + anti-doublon actifs
+- **Branche unique** : tout le travail est sur `main`, les autres branches (`lucid-dubinsky`, `musing-dirac`) sont obsolètes
+
+---
+
+## Ce qui est fait (état au 22-28 février 2026)
 
 - [x] Structure HTML complète (4 sections : calendrier / ateliers / formulaire / confirmation)
 - [x] CSS complet avec variables, responsive mobile, animations
