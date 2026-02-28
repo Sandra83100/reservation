@@ -1,7 +1,7 @@
 // ============================================================
 //  CONFIGURATION — à adapter si besoin
 // ============================================================
-const SHEET_ID = ''; // Laisse vide si le script est lié à la Sheet (recommandé)
+const SHEET_ID = '1x6_cgQwlZaY6p8wAr6_VtGjdRiuEjWpnMWvUAh-Rh1k'; // ID de la Google Sheet
 const ONGLET_ATELIERS      = 'Ateliers';
 const ONGLET_RESERVATIONS  = 'Réservations';
 

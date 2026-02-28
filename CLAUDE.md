@@ -85,7 +85,7 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 ## État du déploiement (28 février 2026)
 
 - **GitHub Pages** : https://sandra83100.github.io/reservation/ (branche `main`)
-- **Apps Script** : Version 8 déployée — email confirmation + anti-doublon actifs
+- **Apps Script** : Version 9 déployée — fix CORS + escapeHtml ajouté dans Code.gs
 - **Branche unique** : tout le travail est sur `main`, les autres branches (`lucid-dubinsky`, `musing-dirac`) sont obsolètes
 
 ---
