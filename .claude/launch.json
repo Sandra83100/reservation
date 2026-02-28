@@ -4,7 +4,7 @@
     {
       "name": "site-ateliers",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "3000"],
+      "runtimeArgs": ["-m", "http.server", "3000", "--directory", "/Users/sandramarino/reservation-ateliers"],
       "port": 3000
     }
   ]
