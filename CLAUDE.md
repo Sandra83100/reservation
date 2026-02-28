@@ -15,7 +15,7 @@ Les visiteurs voient un calendrier, cliquent sur un jour avec des ateliers dispo
 - **Frontend** : HTML + CSS + JS vanilla (aucun framework)
 - **Backend** : Google Apps Script (lié à une Google Sheet)
 - **Base de données** : Google Sheets (deux onglets : Ateliers + Réservations)
-- **Hébergement frontend** : à définir (GitHub Pages, Netlify, ou autre)
+- **Hébergement frontend** : GitHub Pages → https://sandra83100.github.io/reservation/
 
 ---
 
@@ -90,31 +90,48 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 
 ---
 
-## Ce qui est fait (état au 22-28 février 2026)
+## Ce qui est fait (état au 28 février 2026)
 
-- [x] Structure HTML complète (4 sections : calendrier / ateliers / formulaire / confirmation)
+- [x] Structure HTML complète (cartes ateliers / formulaire / confirmation)
 - [x] CSS complet avec variables, responsive mobile, animations
-- [x] Calendrier JS fonctionnel (navigation mois, jours actifs/inactifs, aujourd'hui)
-- [x] Chargement des ateliers via GET Apps Script
-- [x] Affichage des ateliers par jour avec badges de disponibilité
+- [x] Affichage des ateliers sous forme de **cartes par type** (Rencontre animaux, Mémoires écoferme…)
+- [x] Badge **🎟 Gratuit** sur chaque carte (ou prix si payant)
+- [x] Dates en **noms complets** : "Mercredi 4 mars" (pas d'abréviation)
+- [x] Badge disponibilité : vert (dispo) / orange (⚡ dernières places) / rouge (complet)
+- [x] Chargement des ateliers via GET Apps Script (avec fallback DONNEES_TEST en local)
 - [x] Formulaire de réservation avec validation côté client
+- [x] Section spéciale **Rencontre avec les animaux** : stepper enfants, alerte adulte accompagnant
+- [x] Bloc **RGPD** en accordéon dépliable
 - [x] Soumission POST vers Apps Script
 - [x] Mise à jour optimiste du compteur local après réservation
+- [x] **Confirmation par email** HTML automatique (style Écoferme vert) via MailApp
+- [x] **Anti-doublon** : même email ne peut pas réserver deux fois le même atelier
 - [x] Code.gs : doGet (liste ateliers + places restantes), doPost (enregistrement réservation)
 - [x] Code.gs : initialiserSheet() pour créer les onglets avec mise en forme
 - [x] Code.gs : menu personnalisé dans Google Sheets (onOpen)
 - [x] Zébrage automatique des nouvelles lignes de réservation
 - [x] Protection XSS via escapeHtml()
+- [x] **Déploiement GitHub Pages** : https://sandra83100.github.io/reservation/ (branche main)
+- [x] SHEET_ID défini dans Code.gs : `1x6_cgQwlZaY6p8wAr6_VtGjdRiuEjWpnMWvUAh-Rh1k`
 
 ---
 
 ## Points d'attention / À faire
 
-- [ ] **Déploiement du frontend** : choisir un hébergement (GitHub Pages recommandé)
-- [ ] **SHEET_ID** dans Code.gs est vide → le script doit être lié directement à la Sheet (recommandé)
-- [ ] Pas de confirmation par email pour l'instant
+- [ ] **Autorisation MailApp** : la première vraie réservation déclenchera une demande d'autorisation Google — Sandra doit l'accepter dans Apps Script
+- [ ] **Photos et descriptions réelles** à remplacer (actuellement : picsum.photos + Lorem ipsum)
+- [ ] **Badge places** : affiche "8/8 places" même quand tout est dispo — envisager de masquer ou reformuler quand toutes les places sont libres (ex: "Places disponibles")
 - [ ] Pas d'admin pour gérer les ateliers depuis le site (tout passe par Google Sheets directement)
-- [ ] Pas de protection anti-doublon (un même email peut réserver plusieurs fois le même atelier)
+- [ ] Pas de confirmation par SMS
+- [ ] Pas de système de liste d'attente
+
+## ⚠️ Attention au cache navigateur
+
+Le preview local peut afficher une vieille version JS. Si les changements n'apparaissent pas :
+```js
+// Dans la console du navigateur :
+window.location.href = window.location.origin + '/?v=' + Date.now()
+```
 
 ---
 
