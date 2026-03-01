@@ -108,12 +108,14 @@ function getAteliers() {
   const ateliers     = sheetToObjects(sheetAteliers);
   const reservations = sheetToObjects(sheetReservations);
 
-  // Compte les réservations par index d'atelier (colonne "ID Atelier")
+  // Compte les places réservées par atelier (colonne "ID Atelier")
+  // On somme "Nb personnes" si disponible, sinon on compte 1 par ligne (anciens enregistrements)
   const compteur = {};
   reservations.forEach(r => {
     const id = r['ID Atelier'];
     if (id !== '' && id !== undefined) {
-      compteur[id] = (compteur[id] || 0) + 1;
+      const nb = Number(r['Nb personnes']) || 1;
+      compteur[id] = (compteur[id] || 0) + nb;
     }
   });
 
@@ -163,8 +165,12 @@ function doPost(e) {
     }
 
     // --- Vérification des places ---
+    const nbDemandes = Number(nbPersonnes) || 1;
     if (atelier.placesRestantes <= 0) {
       return jsonResponse({ error: 'Cet atelier est complet.' });
+    }
+    if (atelier.placesRestantes < nbDemandes) {
+      return jsonResponse({ error: `Il ne reste que ${atelier.placesRestantes} place${atelier.placesRestantes > 1 ? 's' : ''} disponible${atelier.placesRestantes > 1 ? 's' : ''} pour cet atelier.` });
     }
 
     // --- Protection anti-doublon ---
@@ -184,6 +190,12 @@ function doPost(e) {
     const newNum  = lastRow; // numéro auto (l'en-tête est ligne 1, donc lastRow = nb réservations)
     const now     = new Date();
 
+    // Ajoute la colonne "Nb personnes" à l'en-tête si elle n'existe pas encore
+    const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (!headerRow.includes('Nb personnes')) {
+      sheet.getRange(1, sheet.getLastColumn() + 1).setValue('Nb personnes');
+    }
+
     sheet.appendRow([
       newNum,
       atelier.nom,
@@ -194,7 +206,8 @@ function doPost(e) {
       email,
       tel,
       atelierId,        // ID Atelier (pour le comptage)
-      Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm')
+      Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm'),
+      nbDemandes        // Nb personnes (pour le décompte correct des places)
     ]);
 
     // Applique le zébrage sur la nouvelle ligne
