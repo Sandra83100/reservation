@@ -7,7 +7,14 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXsam9kpgaGdwV
 // prix: null = gratuit, chaîne = montant affiché (ex: '5 €/enfant')
 const CONFIG_ATELIERS = {
   'Rencontre avec les animaux': {
-    photo: 'https://picsum.photos/seed/animaux42/700/400',
+    photos: [
+      'images/animaux/fine2.jpg',
+      'images/animaux/animaux-2.jpg',
+      'images/animaux/animaux-3.jpg',
+      'images/animaux/animaux-4.jpg',
+      'images/animaux/animaux-5.jpg',
+      'images/animaux/animaux-6.jpg',
+    ],
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.',
     prix: null // Gratuit
   },
@@ -145,19 +152,45 @@ function renderCartes() {
       ? `<span class="carte-badge-prix payant">💶 ${escapeHtml(cfg.prix)}</span>`
       : `<span class="carte-badge-prix">🎟 Gratuit</span>`;
 
+    // Photo : carousel si plusieurs photos, sinon image unique
+    const photos = cfg.photos && cfg.photos.length > 0 ? cfg.photos : [cfg.photo || 'https://picsum.photos/seed/atelier/700/400'];
+    const isCarousel = photos.length > 1;
+
+    const photoSection = isCarousel
+      ? `<div class="carte-photo" data-carousel>
+          ${photos.map((src, i) =>
+            `<img src="${src}" alt="${escapeHtml(nom)}" loading="${i === 0 ? 'eager' : 'lazy'}" class="carousel-slide${i === 0 ? ' active' : ''}" />`
+          ).join('')}
+          <div class="carousel-dots">
+            ${photos.map((_, i) =>
+              `<span class="carousel-dot${i === 0 ? ' active' : ''}"></span>`
+            ).join('')}
+          </div>
+          <div class="carte-badges">
+            <span class="carte-badge">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+              </svg>
+              ${placesMax} places
+            </span>
+            ${badgePrix}
+          </div>
+        </div>`
+      : `<div class="carte-photo">
+          <img src="${photos[0]}" alt="${escapeHtml(nom)}" loading="lazy" />
+          <div class="carte-badges">
+            <span class="carte-badge">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+              </svg>
+              ${placesMax} places
+            </span>
+            ${badgePrix}
+          </div>
+        </div>`;
+
     carte.innerHTML = `
-      <div class="carte-photo">
-        <img src="${cfg.photo}" alt="${escapeHtml(nom)}" loading="lazy" />
-        <div class="carte-badges">
-          <span class="carte-badge">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
-              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-            </svg>
-            ${placesMax} places
-          </span>
-          ${badgePrix}
-        </div>
-      </div>
+      ${photoSection}
       <div class="carte-corps">
         <h2 class="carte-titre">${escapeHtml(nom)}</h2>
         <p class="carte-description">${cfg.description}</p>
@@ -193,6 +226,54 @@ function renderCartes() {
     });
 
     conteneur.appendChild(carte);
+  });
+
+  // Lancer les carousels après injection dans le DOM
+  initCarousels();
+}
+
+// ============================================================
+//  CAROUSEL — Auto-rotation des photos
+// ============================================================
+let carouselIntervals = [];
+
+function initCarousels() {
+  // Nettoyer les anciens intervalles (rechargement des cartes)
+  carouselIntervals.forEach(id => clearInterval(id));
+  carouselIntervals = [];
+
+  document.querySelectorAll('[data-carousel]').forEach(el => {
+    const slides = el.querySelectorAll('.carousel-slide');
+    const dots   = el.querySelectorAll('.carousel-dot');
+    if (slides.length <= 1) return;
+
+    let current = 0;
+
+    function goTo(idx) {
+      slides[current].classList.remove('active');
+      dots[current].classList.remove('active');
+      current = (idx + slides.length) % slides.length;
+      slides[current].classList.add('active');
+      dots[current].classList.add('active');
+    }
+
+    // Clic sur les points de navigation
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', e => {
+        e.stopPropagation();
+        goTo(i);
+        resetInterval();
+      });
+    });
+
+    // Auto-rotation toutes les 4 secondes
+    let interval = setInterval(() => goTo(current + 1), 4000);
+    carouselIntervals.push(interval);
+
+    function resetInterval() {
+      clearInterval(interval);
+      interval = setInterval(() => goTo(current + 1), 4000);
+    }
   });
 }
 
