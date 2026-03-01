@@ -439,7 +439,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
               Pour toute question, n'hésitez pas à nous contacter par téléphone au <strong>04 98 00 95 70</strong> ou par mail à <a href="mailto:ecoferme@var.fr" style="color:#3a6b35;text-decoration:underline;">ecoferme@var.fr</a>.
             </p>
             <p style="margin:0 0 25px;font-size:15px;color:#555;line-height:1.6;">
-              Pour que chacun puisse profiter de ce beau moment, pensez à nous prévenir par téléphone ou par mail si vous ne pouvez finalement pas venir — une autre famille sera ravie de prendre votre place !
+              Pour que personne ne manque cette belle expérience, merci de nous prévenir par téléphone ou par mail si vous ne pouvez pas venir — quelqu'un d'autre sera heureux de prendre votre place !
             </p>
 
             <!-- Signature -->
