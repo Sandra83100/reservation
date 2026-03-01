@@ -82,50 +82,69 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 
 ---
 
-## État du déploiement (28 février 2026)
+## État du déploiement (1 mars 2026)
 
 - **GitHub Pages** : https://sandra83100.github.io/reservation/ (branche `main`)
-- **Apps Script** : Version 11 déployée — email amélioré (date lisible, participants, contact, signature)
-- **Nom du projet Apps Script** : "Réservation Ateliers Écoferme" (renommé depuis "Projet sans titre")
-- **Branche unique** : tout le travail est sur `main`, les autres branches (`lucid-dubinsky`, `musing-dirac`) sont obsolètes
+- **Apps Script** : Version 15 déployée (1 mars 2026, 12:07)
+- **Nom du projet Apps Script** : "Réservation Ateliers Écoferme"
+- **Branche unique** : tout le travail est sur `main`
+
+### ⚠️ Déploiement Apps Script — procédure fiable
+Il existe **2 déploiements** dans le projet. Le déploiement **ACTIF** (celui qui sert l'API) s'appelle **"Fix comptage place..."** et utilise toujours la même URL. Pour déployer une nouvelle version :
+1. Déployer → Gérer les déploiements
+2. Cliquer sur **"Fix comptage place..."** dans la liste "Actif"
+3. Cliquer le **crayon** (Modifier)
+4. Ouvrir le dropdown **Version** → sélectionner **"Nouvelle version"**
+5. Cliquer **Déployer** immédiatement (sans cliquer ailleurs)
+6. Vérifier que la confirmation affiche un nouveau numéro de version
 
 ---
 
-## Ce qui est fait (état au 28 février 2026)
+## Ce qui est fait (état au 1 mars 2026)
 
 - [x] Structure HTML complète (cartes ateliers / formulaire / confirmation)
 - [x] CSS complet avec variables, responsive mobile, animations
 - [x] Affichage des ateliers sous forme de **cartes par type** (Rencontre animaux, Mémoires écoferme…)
 - [x] Badge **🎟 Gratuit** sur chaque carte (ou prix si payant)
 - [x] Dates en **noms complets** : "Mercredi 4 mars" (pas d'abréviation)
-- [x] Badge disponibilité : vert (dispo) / orange (⚡ dernières places) / rouge (complet)
+- [x] Badge disponibilité : vert (dispo) / orange (⚡ dernières places) / rouge (complet) — affiche "X places restantes"
 - [x] Chargement des ateliers via GET Apps Script (avec fallback DONNEES_TEST en local)
 - [x] Formulaire de réservation avec validation côté client
 - [x] Section spéciale **Rencontre avec les animaux** : stepper enfants, alerte adulte accompagnant
 - [x] Bloc **RGPD** en accordéon dépliable
 - [x] Soumission POST vers Apps Script
 - [x] Mise à jour optimiste du compteur local après réservation
-- [x] **Confirmation par email** HTML automatique (style Écoferme vert) via MailApp
-- [x] **Autorisation MailApp** accordée — emails envoyés automatiquement après chaque réservation
+- [x] **Carousel** sur "Rencontre avec les animaux" : 8 photos réelles (Fine1–3, bassecour1–2, chevre1–2, lapine), rotation 5s, dots de navigation — dossier `images/animaux/`
+- [x] **Photos plus hautes** : aspect-ratio 16/12 sur les 3 ateliers
+- [x] **Dates disponibles** : bloc agrandi +30% (icône + texte)
+- [x] **Confirmation par email** HTML automatique via MailApp
+- [x] **Autorisation MailApp** accordée
 - [x] **Anti-doublon** : même email ne peut pas réserver deux fois le même atelier
-- [x] Code.gs : doGet (liste ateliers + places restantes), doPost (enregistrement réservation)
-- [x] Code.gs : initialiserSheet() pour créer les onglets avec mise en forme
-- [x] Code.gs : menu personnalisé dans Google Sheets (onOpen)
-- [x] Zébrage automatique des nouvelles lignes de réservation
-- [x] Protection XSS via escapeHtml()
+- [x] **Comptage places** : somme `Nb personnes` (colonne K) au lieu de compter les lignes
+- [x] Code.gs : doGet (liste ateliers + places restantes + annulation), doPost (enregistrement réservation)
+- [x] Code.gs : `dateToGcal()` pour URL Google Calendar, `handleAnnulation()` page HTML
+- [x] Code.gs : initialiserSheet(), menu personnalisé onOpen()
+- [x] Zébrage automatique (11 colonnes), protection XSS escapeHtml()
 - [x] **Déploiement GitHub Pages** : https://sandra83100.github.io/reservation/ (branche main)
-- [x] SHEET_ID défini dans Code.gs : `1x6_cgQwlZaY6p8wAr6_VtGjdRiuEjWpnMWvUAh-Rh1k`
-- [x] Projet Apps Script renommé : "Réservation Ateliers Écoferme"
-- [x] **Email v11** : date lisible ("Mercredi 4 mars 2026"), participants (adulte + enfants avec âges pour Rencontre animaux, nb places pour autres), contact téléphone + mailto, phrase "pensez à nous prévenir", signature avec 📞 04 98 00 95 70, 📍 55 allée Georges Legg 83000 Toulon, lien Facebook
-- [x] `formatDateLisible()` dans Code.gs : convertit "DD/MM/YYYY" → "Mercredi 4 mars 2026"
-- [x] `doPost()` extrait `nbPersonnes` et `agesEnfants` et les passe à `envoyerEmailConfirmation()`
+- [x] SHEET_ID : `1x6_cgQwlZaY6p8wAr6_VtGjdRiuEjWpnMWvUAh-Rh1k`
+- [x] **Email v15** :
+  - Police Arial/sans-serif partout
+  - Date lisible "Mercredi 4 mars 2026"
+  - Palette vert foncé #1F6B2E
+  - Encart atelier (nom + date + heure)
+  - Bouton **📅 Ajouter à mon agenda** (URL Google Calendar dynamique)
+  - Bouton **✖ Annuler ma réservation** (token base64 `email|atelierId`, page HTML de confirmation)
+  - Bloc participants : "Enfant 1 — âge : 3 à 10 ans"
+  - 📞 04 98 00 95 70 cliquable (`tel:+33498009570`)
+  - 📍 Adresse cliquable vers Google Maps
+  - 2 boutons Facebook : **👍 Notre page** (fond #1877F2) + **🔔 Suivre** (bordure #1877F2)
+  - Footer : coordonnées + boutons Facebook + séparateur + mention auto
 
 ---
 
 ## Points d'attention / À faire
 
-- [ ] **Photos et descriptions réelles** à remplacer (actuellement : picsum.photos + Lorem ipsum)
-- [ ] **Badge places** : affiche "8/8 places" même quand tout est dispo — envisager de masquer ou reformuler quand toutes les places sont libres (ex: "Places disponibles")
+- [ ] **Descriptions réelles** à remplacer (actuellement Lorem ipsum sur Visite et Couture)
 - [ ] Pas d'admin pour gérer les ateliers depuis le site (tout passe par Google Sheets directement)
 - [ ] Pas de confirmation par SMS
 - [ ] Pas de système de liste d'attente
