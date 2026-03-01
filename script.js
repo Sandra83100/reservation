@@ -69,6 +69,17 @@ function bindEvents() {
   });
   document.getElementById('form-reservation').addEventListener('submit', soumettreReservation);
 
+  // Auto-formatage téléphone : 0612345678 → 06 12 34 56 78
+  document.getElementById('tel').addEventListener('input', (e) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+    let formatted = '';
+    for (let i = 0; i < digits.length; i++) {
+      if (i > 0 && i % 2 === 0) formatted += ' ';
+      formatted += digits[i];
+    }
+    e.target.value = formatted;
+  });
+
   // Stepper enfants (Fiche #02)
   document.getElementById('stepper-moins').addEventListener('click', () => changerNbEnfants(-1));
   document.getElementById('stepper-plus').addEventListener('click',  () => changerNbEnfants(+1));
@@ -392,7 +403,7 @@ async function soumettreReservation(e) {
   let valide = true;
   if (!nom)                          { afficherErreurChamp('prenom', 'Veuillez saisir votre prénom.'); valide = false; }
   if (!email || !isEmailValide(email)) { afficherErreurChamp('email',  'Adresse email invalide.'); valide = false; }
-  if (!tel)                          { afficherErreurChamp('tel',    'Veuillez saisir votre téléphone.'); valide = false; }
+  if (!tel || !/^0\d( \d{2}){4}$/.test(tel)) { afficherErreurChamp('tel', 'Format invalide — ex : 06 00 00 00 00'); valide = false; }
 
   // Calcul du nombre de participants selon l'atelier
   let nbPersonnes = 0;
