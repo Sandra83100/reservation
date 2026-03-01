@@ -269,12 +269,12 @@ function initCarousels() {
     });
 
     // Auto-rotation toutes les 4 secondes
-    let interval = setInterval(() => goTo(current + 1), 4000);
+    let interval = setInterval(() => goTo(current + 1), 5000);
     carouselIntervals.push(interval);
 
     function resetInterval() {
       clearInterval(interval);
-      interval = setInterval(() => goTo(current + 1), 4000);
+      interval = setInterval(() => goTo(current + 1), 5000);
     }
   });
 }

@@ -136,7 +136,7 @@ main {
 /* ── Photo ── */
 .carte-photo {
   position: relative;
-  aspect-ratio: 16 / 10.8; /* hauteur +20% vs 16/9 */
+  aspect-ratio: 16 / 12; /* hauteur +33% vs 16/9 — photos plus hautes */
   overflow: hidden;
   flex-shrink: 0;
 }
