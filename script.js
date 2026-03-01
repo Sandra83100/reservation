@@ -8,12 +8,14 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXsam9kpgaGdwV
 const CONFIG_ATELIERS = {
   'Rencontre avec les animaux': {
     photos: [
-      'images/animaux/fine2.jpg',
-      'images/animaux/animaux-2.jpg',
-      'images/animaux/animaux-3.jpg',
-      'images/animaux/animaux-4.jpg',
-      'images/animaux/animaux-5.jpg',
-      'images/animaux/animaux-6.jpg',
+      'images/animaux/Fine1.jpg',
+      'images/animaux/Fine2.jpg',
+      'images/animaux/Fine3.jpg',
+      'images/animaux/bassecour1.jpg',
+      'images/animaux/bassecour2.jpg',
+      'images/animaux/chevre1.jpeg',
+      'images/animaux/chevre2.jpeg',
+      'images/animaux/lapine.jpg',
     ],
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.',
     prix: null // Gratuit
