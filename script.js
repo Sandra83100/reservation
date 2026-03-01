@@ -169,7 +169,7 @@ function renderCartes() {
                 const badgeClass = a.placesRestantes <= 2 ? 'last' : 'dispo';
                 const badgeTexte = a.placesRestantes <= 2
                   ? `⚡ ${a.placesRestantes} place${a.placesRestantes > 1 ? 's' : ''} restante${a.placesRestantes > 1 ? 's' : ''}`
-                  : `${a.placesRestantes}/${a.placesMax} places`;
+                  : `${a.placesRestantes} place${a.placesRestantes > 1 ? 's' : ''} restante${a.placesRestantes > 1 ? 's' : ''}`;
                 return `
                   <div class="carte-slot">
                     <div class="slot-info">
