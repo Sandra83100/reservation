@@ -163,7 +163,7 @@ function renderCartes() {
     // Badge prix — Fiche #01
     const badgePrix = cfg.prix
       ? `<span class="carte-badge-prix payant">💶 ${escapeHtml(cfg.prix)}</span>`
-      : `<span class="carte-badge-prix">🎟 Gratuit</span>`;
+      : `<span class="carte-badge-prix">Gratuit</span>`;
 
     // Photo : carousel si plusieurs photos, sinon image unique
     const photos = cfg.photos && cfg.photos.length > 0 ? cfg.photos : [cfg.photo || 'https://picsum.photos/seed/atelier/700/400'];

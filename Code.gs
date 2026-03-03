@@ -102,6 +102,7 @@ function doGet(e) {
     const action = e && e.parameter && e.parameter.action;
     if (action === 'getAteliers') return jsonResponse(getAteliers());
     if (action === 'annuler')     return handleAnnulation(e.parameter.token);
+    if (action === 'ics')         return generateIcs(e.parameter.id);
     return jsonResponse({ status: 'ok', message: 'API de réservation opérationnelle' });
   } catch (err) {
     return jsonResponse({ error: err.message });
@@ -207,6 +208,41 @@ function handleAnnulation(token) {
   } catch (err) {
     return page('Erreur', 'Une erreur est survenue : ' + escapeHtml(err.message), '#C0392B');
   }
+}
+
+// ============================================================
+//  ICS — Fichier calendrier téléchargeable (Apple / Outlook)
+// ============================================================
+
+function generateIcs(atelierId) {
+  const ateliers = getAteliers();
+  const atelier  = ateliers.find(a => a.id === Number(atelierId));
+  if (!atelier) {
+    return ContentService.createTextOutput('Atelier introuvable')
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+
+  const dtStart = dateToGcal(atelier.date, atelier.debut);
+  const dtEnd   = dateToGcal(atelier.date, atelier.fin);
+
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Ecoferme du Var//Reservation//FR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    'SUMMARY:' + atelier.nom + ' \u2014 Ecoferme du Var',
+    'DTSTART:' + dtStart,
+    'DTEND:'   + dtEnd,
+    'LOCATION:265 allee Georges Leygues\\, 83000 Toulon',
+    'DESCRIPTION:Reservation confirmee a l\'Ecoferme du Var. Contact : 04 98 00 95 70',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  return ContentService.createTextOutput(icsContent)
+    .setMimeType(ContentService.MimeType.TEXT);
 }
 
 // ============================================================
@@ -362,7 +398,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
       + '&text='     + encodeURIComponent(atelier.nom + ' — Écoferme du Var')
       + '&dates='    + gcalStart + '/' + gcalEnd
       + '&details='  + encodeURIComponent('Réservation confirmée à l\'Écoferme du Var')
-      + '&location=' + encodeURIComponent('55 allée Georges Legg, 83000 Toulon');
+      + '&location=' + encodeURIComponent('265 allée Georges Leygues 83000 Toulon');
 
     // --- Labels âge ---
     const labelsAge = {
@@ -371,13 +407,15 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
       'plus-10ans': 'Plus de 10 ans'
     };
 
+    // --- URL fichier ICS (Apple Calendar / Outlook) ---
+    const icsUrl = SCRIPT_URL + '?action=ics&id=' + atelier.id;
+
     // --- Bloc participants ---
-    const NOM_ANIMAUX = 'Rencontre avec les animaux';
     let participantsHtml = '';
-    if (atelier.nom === NOM_ANIMAUX && agesEnfants && agesEnfants.length > 0) {
+    if (agesEnfants && agesEnfants.length > 0) {
       const nbEnfants  = agesEnfants.length;
       const lignesAges = agesEnfants
-        .map((a, i) => `Enfant ${i + 1} — âge : ${labelsAge[a] || a}`)
+        .map((a, i) => `Enfant ${i + 1} — tranche d'âge : ${labelsAge[a] || a}`)
         .join('<br>');
       participantsHtml = `
         <table width="100%" cellpadding="0" cellspacing="0" style="background:#E8F5EB;border-left:4px solid #1F6B2E;border-radius:4px;margin-bottom:20px;">
@@ -394,7 +432,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
         <table width="100%" cellpadding="0" cellspacing="0" style="background:#E8F5EB;border-left:4px solid #1F6B2E;border-radius:4px;margin-bottom:20px;">
           <tr>
             <td style="padding:15px 20px;font-size:15px;color:#333;">
-              <strong>Participants réservés :</strong> ${nbPersonnes} place${nbPersonnes > 1 ? 's' : ''}
+              <strong>Participants réservés :</strong> ${nbPersonnes} personne${nbPersonnes > 1 ? 's' : ''}
             </td>
           </tr>
         </table>`;
@@ -413,7 +451,8 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
 
         <!-- En-tête -->
         <tr>
-          <td style="background:#1F6B2E;padding:30px 40px;text-align:center;">
+          <td style="background:#1F6B2E;padding:24px 40px;text-align:center;">
+            <img src="https://URL-DU-LOGO-A-REMPLACER.png" alt="Écoferme départementale de la Barre" height="60" style="display:block;margin:0 auto 12px auto;">
             <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:normal;">🌿 Réservation confirmée</h1>
           </td>
         </tr>
@@ -424,7 +463,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
 
             <p style="margin:0 0 20px;font-size:16px;color:#333;">Bonjour <strong>${escapeHtml(nom)}</strong>,</p>
             <p style="margin:0 0 25px;font-size:16px;color:#333;line-height:1.6;">
-              Votre réservation est bien confirmée. Nous avons hâte de vous accueillir !
+              Votre réservation est bien confirmée. Nous avons hâte de vous accueillir à l'Écoferme départementale de la Barre !
             </p>
 
             <!-- Récap atelier -->
@@ -438,20 +477,33 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
               </tr>
             </table>
 
-            <!-- Boutons Agenda + Annulation -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <!-- Boutons Agenda (3 choix) -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
               <tr>
                 <td align="center">
+                  <p style="margin:0 0 10px;font-size:12px;color:#777;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">📅 Ajouter à mon agenda</p>
                   <table cellpadding="0" cellspacing="0">
                     <tr>
-                      <td style="padding:0 6px 0 0;">
-                        <a href="${calendarUrl}" style="display:inline-block;padding:12px 20px;background:#ffffff;border:2px solid #2D8B3E;color:#2D8B3E;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;">📅 Ajouter à mon agenda</a>
+                      <td style="padding:0 4px 0 0;">
+                        <a href="${calendarUrl}" target="_blank" style="display:inline-block;padding:10px 14px;background:#ffffff;border:2px solid #2D8B3E;color:#2D8B3E;border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold;">📅 Google Agenda</a>
                       </td>
-                      <td style="padding:0 0 0 6px;">
-                        <a href="${cancelUrl}" style="display:inline-block;padding:12px 20px;background:#ffffff;border:2px solid #C0392B;color:#C0392B;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;">✖ Annuler ma réservation</a>
+                      <td style="padding:0 4px;">
+                        <a href="${icsUrl}" style="display:inline-block;padding:10px 14px;background:#ffffff;border:2px solid #2D8B3E;color:#2D8B3E;border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold;">🍎 Apple Calendar</a>
+                      </td>
+                      <td style="padding:0 0 0 4px;">
+                        <a href="${icsUrl}" download="atelier-ecoferme.ics" style="display:inline-block;padding:10px 14px;background:#ffffff;border:2px solid #2D8B3E;color:#2D8B3E;border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold;">📥 Autre / Outlook</a>
                       </td>
                     </tr>
                   </table>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Bouton Annuler -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <tr>
+                <td align="center">
+                  <a href="${cancelUrl}" style="display:inline-block;padding:12px 20px;background:#ffffff;border:2px solid #C0392B;color:#C0392B;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;">✖ Annuler ma réservation</a>
                 </td>
               </tr>
             </table>
@@ -465,8 +517,8 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
               <a href="tel:+33498009570" style="color:#1F6B2E;font-weight:bold;text-decoration:none;">04 98 00 95 70</a>
               ou à <a href="mailto:ecoferme@var.fr" style="color:#1F6B2E;text-decoration:underline;">ecoferme@var.fr</a>.
             </p>
-            <p style="margin:0 0 0;font-size:15px;color:#555;line-height:1.6;">
-              Pour que personne ne manque cette belle expérience, merci de nous prévenir par téléphone ou par mail si vous ne pouvez pas venir — quelqu'un d'autre sera heureux de prendre votre place !
+            <p style="margin:0 0 0;font-size:14px;color:#555;line-height:1.4;">
+              En cas d'empêchement, afin que chacun puisse bénéficier de cette belle expérience, merci de bien vouloir nous en informer (via le bouton annuler ma réservation, par mail ou par téléphone).
             </p>
 
           </td>
@@ -483,20 +535,16 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
               <a href="mailto:ecoferme@var.fr" style="color:#1F6B2E;text-decoration:none;">✉ ecoferme@var.fr</a>
             </p>
             <p style="margin:0 0 20px;font-size:14px;color:#333;">
-              <a href="https://maps.google.com/?q=55+allée+Georges+Legg+83000+Toulon" style="color:#1F6B2E;text-decoration:none;">📍 55, allée Georges Legg, 83000 Toulon</a>
+              <a href="https://maps.google.com/?q=265+allée+Georges+Leygues+83000+Toulon" style="color:#1F6B2E;text-decoration:none;">📍 55 allée Georges Leygues, 83000 Toulon</a>
             </p>
 
-            <!-- Boutons Facebook -->
-            <table cellpadding="0" cellspacing="0" style="margin:0 auto 20px;">
-              <tr>
-                <td style="padding:0 6px 0 0;">
-                  <a href="https://www.facebook.com/ecofermedudepartementduvar" style="display:inline-block;padding:10px 20px;background:#1877F2;color:#ffffff;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;">👍 Notre page Facebook</a>
-                </td>
-                <td style="padding:0 0 0 6px;">
-                  <a href="https://www.facebook.com/ecofermedudepartementduvar" style="display:inline-block;padding:10px 20px;background:#ffffff;border:2px solid #1877F2;color:#1877F2;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;">🔔 Suivre notre actualité</a>
-                </td>
-              </tr>
-            </table>
+            <!-- Facebook -->
+            <p style="margin:0 0 20px;">
+              <a href="https://www.facebook.com/ecofermedepartementaledelabarre/" style="display:inline-flex;align-items:center;gap:8px;color:#1877F2;text-decoration:none;font-size:14px;">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#1877F2;border-radius:4px;color:#ffffff;font-weight:bold;font-size:13px;line-height:1;">f</span>
+                Suivez notre actualité sur Facebook
+              </a>
+            </p>
 
             <hr style="border:none;border-top:1px solid #c8dfc9;margin:0 0 12px;">
             <p style="margin:0;font-size:12px;color:#999;">Cet email a été envoyé automatiquement suite à votre réservation.</p>

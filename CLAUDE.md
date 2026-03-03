@@ -82,17 +82,17 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 
 ---
 
-## État du déploiement (1 mars 2026)
+## État du déploiement (3 mars 2026)
 
 - **GitHub Pages** : https://sandra83100.github.io/reservation/ (branche `main`)
-- **Apps Script** : Version 15 déployée (1 mars 2026, 12:07)
+- **Apps Script** : Version 19 déployée (3 mars 2026, 23:21)
 - **Nom du projet Apps Script** : "Réservation Ateliers Écoferme"
 - **Branche unique** : tout le travail est sur `main`
 
 ### ⚠️ Déploiement Apps Script — procédure fiable
-Il existe **2 déploiements** dans le projet. Le déploiement **ACTIF** (celui qui sert l'API) s'appelle **"Fix comptage place..."** et utilise toujours la même URL. Pour déployer une nouvelle version :
+Le déploiement **ACTIF** est listé sous **"Sans titre"** dans la section Actif (il était nommé "Fix comptage place..." dans les versions précédentes). Il utilise toujours la même URL. Pour déployer une nouvelle version :
 1. Déployer → Gérer les déploiements
-2. Cliquer sur **"Fix comptage place..."** dans la liste "Actif"
+2. Cliquer sur **"Sans titre"** dans la liste "Actif"
 3. Cliquer le **crayon** (Modifier)
 4. Ouvrir le dropdown **Version** → sélectionner **"Nouvelle version"**
 5. Cliquer **Déployer** immédiatement (sans cliquer ailleurs)
@@ -100,12 +100,12 @@ Il existe **2 déploiements** dans le projet. Le déploiement **ACTIF** (celui q
 
 ---
 
-## Ce qui est fait (état au 1 mars 2026)
+## Ce qui est fait (état au 3 mars 2026)
 
 - [x] Structure HTML complète (cartes ateliers / formulaire / confirmation)
 - [x] CSS complet avec variables, responsive mobile, animations
 - [x] Affichage des ateliers sous forme de **cartes par type** (Rencontre animaux, Mémoires écoferme…)
-- [x] Badge **🎟 Gratuit** sur chaque carte (ou prix si payant)
+- [x] Badge **Gratuit** pastille vert foncé `#1F6B2E` sur chaque carte (sans emoji ticket) — ou prix si payant
 - [x] Dates en **noms complets** : "Mercredi 4 mars" (pas d'abréviation)
 - [x] Badge disponibilité : vert (dispo) / orange (⚡ dernières places) / rouge (complet) — affiche "X places restantes"
 - [x] Chargement des ateliers via GET Apps Script (avec fallback DONNEES_TEST en local)
@@ -121,30 +121,39 @@ Il existe **2 déploiements** dans le projet. Le déploiement **ACTIF** (celui q
 - [x] **Autorisation MailApp** accordée
 - [x] **Anti-doublon** : même email ne peut pas réserver deux fois le même atelier
 - [x] **Comptage places** : somme `Nb personnes` (colonne K) au lieu de compter les lignes
-- [x] Code.gs : doGet (liste ateliers + places restantes + annulation), doPost (enregistrement réservation)
+- [x] Code.gs : doGet (liste ateliers + places restantes + annulation + **ICS**), doPost (enregistrement réservation)
 - [x] Code.gs : `dateToGcal()` pour URL Google Calendar, `handleAnnulation()` page HTML
+- [x] Code.gs : `generateIcs()` → endpoint `?action=ics&id=X` — fichier `.ics` pour Apple Calendar / Outlook
 - [x] Code.gs : initialiserSheet(), menu personnalisé onOpen()
 - [x] Zébrage automatique (11 colonnes), protection XSS escapeHtml()
 - [x] **Déploiement GitHub Pages** : https://sandra83100.github.io/reservation/ (branche main)
 - [x] SHEET_ID : `1x6_cgQwlZaY6p8wAr6_VtGjdRiuEjWpnMWvUAh-Rh1k`
-- [x] **Email v15** :
-  - Police Arial/sans-serif partout
-  - Date lisible "Mercredi 4 mars 2026"
-  - Palette vert foncé #1F6B2E
-  - Encart atelier (nom + date + heure)
-  - Bouton **📅 Ajouter à mon agenda** (URL Google Calendar dynamique)
-  - Bouton **✖ Annuler ma réservation** (token base64 `email|atelierId`, page HTML de confirmation)
-  - Bloc participants : "Enfant 1 — âge : 3 à 10 ans"
-  - 📞 04 98 00 95 70 cliquable (`tel:+33498009570`)
-  - 📍 Adresse cliquable vers Google Maps
-  - 2 boutons Facebook : **👍 Notre page** (fond #1877F2) + **🔔 Suivre** (bordure #1877F2)
-  - Footer : coordonnées + boutons Facebook + séparateur + mention auto
+
+### Header page catalogue (3 mars 2026)
+- [x] **Logo** : balise `<img src="logo-ecoferme.png">` centrée au-dessus du titre (fichier PNG à déposer à la racine)
+- [x] **Bandeau "Ateliers gratuits · Entrée libre"** supprimé
+- [x] **Sous-titre** mis à jour : "ateliers 100% gratuits, réservez votre place en quelques clics !"
+
+### Email v19 (3 mars 2026)
+- [x] Police Arial/sans-serif partout
+- [x] Date lisible "Mercredi 4 mars 2026"
+- [x] Palette vert foncé #1F6B2E
+- [x] Encart atelier (nom + date + heure)
+- [x] **Agenda 3 choix** : 📅 Google Agenda / 🍎 Apple Calendar / 📥 Autre–Outlook (liens ICS dynamiques)
+- [x] Bouton **✖ Annuler ma réservation** (token base64 `email|atelierId`, page HTML de confirmation)
+- [x] **Participants** : détail "1 adulte et X enfants — tranche d'âge" pour tous les ateliers (plus limité à Rencontre animaux)
+- [x] 📞 04 98 00 95 70 cliquable (`tel:+33498009570`)
+- [x] 📍 55 allée Georges Leygues (texte) → lien Maps vers 265 allée (accès réel)
+- [x] **Logo** dans le bandeau vert header email — placeholder `https://URL-DU-LOGO-A-REMPLACER.png` à remplacer avec URL WordPress
+- [x] Bouton Facebook "Suivez notre actualité sur Facebook"
+- [x] Footer : coordonnées + Facebook + séparateur + mention auto
 
 ---
 
 ## Points d'attention / À faire
 
-- [ ] **Descriptions réelles** à remplacer (actuellement Lorem ipsum sur Visite et Couture)
+- [ ] **Logo** : déposer `logo-ecoferme.png` à la racine du projet (page catalogue) ET fournir l'URL WordPress pour le header de l'email (remplacer `https://URL-DU-LOGO-A-REMPLACER.png` dans `Code.gs` puis redéployer)
+- [ ] **Descriptions réelles** à remplacer (actuellement Lorem ipsum sur toutes les cartes)
 - [ ] Pas d'admin pour gérer les ateliers depuis le site (tout passe par Google Sheets directement)
 - [ ] Pas de confirmation par SMS
 - [ ] Pas de système de liste d'attente
