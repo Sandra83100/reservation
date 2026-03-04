@@ -595,19 +595,19 @@ function organiserReservations() {
     return;
   }
 
-  // Tri : Nom atelier (col B=1) → Date (col C=2) → Heure début (col D=3)
+  // Tri : Date (col C=2) → Heure début (col D=3) → Nom atelier (col B=1)
   rows.sort((a, b) => {
-    const nomA = String(a[1] || '').toLowerCase().trim();
-    const nomB = String(b[1] || '').toLowerCase().trim();
-    if (nomA !== nomB) return nomA < nomB ? -1 : 1;
-
     const dateA = _dateTriable(a[2]);
     const dateB = _dateTriable(b[2]);
     if (dateA !== dateB) return dateA < dateB ? -1 : 1;
 
     const heureA = String(a[3] || '');
     const heureB = String(b[3] || '');
-    return heureA < heureB ? -1 : heureA > heureB ? 1 : 0;
+    if (heureA !== heureB) return heureA < heureB ? -1 : 1;
+
+    const nomA = String(a[1] || '').toLowerCase().trim();
+    const nomB = String(b[1] || '').toLowerCase().trim();
+    return nomA < nomB ? -1 : nomA > nomB ? 1 : 0;
   });
 
   // Effacer toutes les lignes de données (conserver l'en-tête)
@@ -616,13 +616,13 @@ function organiserReservations() {
     sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clear();
   }
 
-  // Réécrire avec ligne séparatrice entre chaque groupe (atelier + date)
+  // Réécrire avec ligne séparatrice entre chaque groupe (date + heure début + atelier)
   let writeRow   = 2;
   let lastGroupe = null;
   let zebraIdx   = 0;
 
   rows.forEach(row => {
-    const groupe = String(row[1] || '').trim() + '|' + _dateTriable(row[2]);
+    const groupe = _dateTriable(row[2]) + '|' + String(row[3] || '') + '|' + String(row[1] || '').trim();
 
     if (lastGroupe !== null && groupe !== lastGroupe) {
       writeRow++; // ligne vide séparatrice
