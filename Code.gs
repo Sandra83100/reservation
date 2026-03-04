@@ -586,7 +586,7 @@ function organiserReservations() {
   const nbCols  = headers.length;
 
   // Filtrer les lignes vides (séparateurs existants)
-  const rows = allData.slice(1).filter(row =>
+  let rows = allData.slice(1).filter(row =>
     row[1] !== '' && row[1] !== undefined && row[1] !== null
   );
 
@@ -615,6 +615,15 @@ function organiserReservations() {
   if (lastRow > 1) {
     sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clear();
   }
+
+  // Normaliser les colonnes date/heure (convertir objets Date en chaînes)
+  rows = rows.map(row => {
+    const r = row.slice();
+    if (r[2] instanceof Date) r[2] = formatDate(r[2]);
+    if (r[3] instanceof Date) r[3] = formatTime(r[3]);
+    if (r[4] instanceof Date) r[4] = formatTime(r[4]);
+    return r;
+  });
 
   // Réécrire avec ligne séparatrice entre chaque groupe (date + heure début + atelier)
   let writeRow   = 2;
