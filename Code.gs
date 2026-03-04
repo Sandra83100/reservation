@@ -566,12 +566,107 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
 }
 
 // ============================================================
+//  ORGANISATION DES RÉSERVATIONS
+// ============================================================
+
+/**
+ * Trie l'onglet Réservations par : 1. Nom atelier → 2. Date → 3. Heure début
+ * Insère une ligne vide entre chaque groupe (même atelier + même date).
+ * À lancer depuis le menu "🎨 Ateliers" dans Google Sheets.
+ */
+function organiserReservations() {
+  const sheet   = getSheet(ONGLET_RESERVATIONS);
+  const allData = sheet.getDataRange().getValues();
+  if (allData.length < 2) {
+    SpreadsheetApp.getUi().alert('Aucune réservation à organiser.');
+    return;
+  }
+
+  const headers = allData[0];
+  const nbCols  = headers.length;
+
+  // Filtrer les lignes vides (séparateurs existants)
+  const rows = allData.slice(1).filter(row =>
+    row[1] !== '' && row[1] !== undefined && row[1] !== null
+  );
+
+  if (rows.length === 0) {
+    SpreadsheetApp.getUi().alert('Aucune réservation à organiser.');
+    return;
+  }
+
+  // Tri : Nom atelier (col B=1) → Date (col C=2) → Heure début (col D=3)
+  rows.sort((a, b) => {
+    const nomA = String(a[1] || '').toLowerCase().trim();
+    const nomB = String(b[1] || '').toLowerCase().trim();
+    if (nomA !== nomB) return nomA < nomB ? -1 : 1;
+
+    const dateA = _dateTriable(a[2]);
+    const dateB = _dateTriable(b[2]);
+    if (dateA !== dateB) return dateA < dateB ? -1 : 1;
+
+    const heureA = String(a[3] || '');
+    const heureB = String(b[3] || '');
+    return heureA < heureB ? -1 : heureA > heureB ? 1 : 0;
+  });
+
+  // Effacer toutes les lignes de données (conserver l'en-tête)
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clear();
+  }
+
+  // Réécrire avec ligne séparatrice entre chaque groupe (atelier + date)
+  let writeRow   = 2;
+  let lastGroupe = null;
+  let zebraIdx   = 0;
+
+  rows.forEach(row => {
+    const groupe = String(row[1] || '').trim() + '|' + _dateTriable(row[2]);
+
+    if (lastGroupe !== null && groupe !== lastGroupe) {
+      writeRow++; // ligne vide séparatrice
+    }
+    lastGroupe = groupe;
+
+    sheet.getRange(writeRow, 1, 1, nbCols).setValues([row]);
+    const couleur = zebraIdx % 2 === 0 ? '#FFFFFF' : '#F1F8E9';
+    sheet.getRange(writeRow, 1, 1, Math.min(nbCols, 11))
+      .setBackground(couleur)
+      .setBorder(true, true, true, true, true, true);
+
+    writeRow++;
+    zebraIdx++;
+  });
+
+  SpreadsheetApp.getUi().alert(
+    '✅ ' + rows.length + ' réservation(s) organisées par atelier et date.'
+  );
+}
+
+/**
+ * Convertit une date (objet Date ou chaîne "DD/MM/YYYY") en "YYYYMMDD" pour le tri.
+ */
+function _dateTriable(val) {
+  if (!val) return '';
+  if (val instanceof Date) {
+    return val.getFullYear()
+      + String(val.getMonth() + 1).padStart(2, '0')
+      + String(val.getDate()).padStart(2, '0');
+  }
+  const parts = String(val).split('/');
+  if (parts.length === 3) return parts[2] + parts[1] + parts[0];
+  return String(val);
+}
+
+// ============================================================
 //  MENU PERSONNALISÉ dans Google Sheets
 // ============================================================
 
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('🎨 Ateliers')
-    .addItem('Initialiser les onglets', 'initialiserSheet')
+    .addItem('Initialiser les onglets',       'initialiserSheet')
+    .addItem('Organiser les réservations',    'organiserReservations')
     .addToUi();
 }
