@@ -63,6 +63,11 @@ function bindEvents() {
     atelierSelectionne = null;
     afficherSection('cartes');
   });
+  document.getElementById('lien-retour-accueil').addEventListener('click', (e) => {
+    e.preventDefault();
+    atelierSelectionne = null;
+    afficherSection('cartes');
+  });
   document.getElementById('btn-reessayer').addEventListener('click', () => {
     masquerErreurGlobale();
     chargerAteliers();
@@ -290,14 +295,15 @@ function initCarousels() {
   });
 }
 
-/** Convertit "DD/MM/YYYY" en "Mercredi 4 mars" */
-function formatDateLisible(dateStr) {
+/** Convertit "DD/MM/YYYY" en "Mercredi 4 mars" (avecAnnee=true → "Mercredi 4 mars 2026") */
+function formatDateLisible(dateStr, avecAnnee = false) {
   const [dd, mm, yyyy] = dateStr.split('/');
   const date = new Date(yyyy, mm - 1, dd);
   const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
   const mois  = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
                   'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-  return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]}`;
+  const base = `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]}`;
+  return avecAnnee ? `${base} ${yyyy}` : base;
 }
 
 // ============================================================
@@ -465,12 +471,27 @@ async function soumettreReservation(e) {
       return;
     }
 
-    document.getElementById('confirmation-message').textContent =
-      data.message || 'Votre réservation a bien été enregistrée.';
-
     // Mettre à jour le compteur local
     const a = ateliers.find(x => x.id === atelierSelectionne.id);
     if (a) a.placesRestantes = Math.max(0, a.placesRestantes - 1);
+
+    // Remplir la page de confirmation
+    const cfg = CONFIG_ATELIERS[atelierSelectionne.nom] || {};
+    const photoSrc = cfg.photos ? cfg.photos[0] : (cfg.photo || '');
+    const photoEl = document.getElementById('confirmation-photo');
+    if (photoSrc) {
+      photoEl.src = photoSrc;
+      photoEl.alt = atelierSelectionne.nom;
+      photoEl.parentElement.classList.remove('hidden');
+    } else {
+      photoEl.parentElement.classList.add('hidden');
+    }
+    document.getElementById('conf-atelier').textContent = atelierSelectionne.nom;
+    document.getElementById('conf-date').textContent = formatDateLisible(atelierSelectionne.date, true);
+    document.getElementById('conf-horaire').textContent = `${atelierSelectionne.debut} – ${atelierSelectionne.fin}`;
+    document.getElementById('conf-nom').textContent = nom;
+    document.getElementById('conf-participants').textContent =
+      `${nbPersonnes} personne${nbPersonnes > 1 ? 's' : ''}`;
 
     afficherSection('confirmation');
 
@@ -488,6 +509,17 @@ function afficherSection(section) {
   document.getElementById('cartes-section').classList.add('hidden');
   document.getElementById('formulaire-section').classList.add('hidden');
   document.getElementById('confirmation-section').classList.add('hidden');
+
+  // Mettre à jour le header selon la section
+  const headerH1 = document.getElementById('header-h1');
+  const headerSubtitle = document.getElementById('header-subtitle');
+  if (section === 'confirmation') {
+    headerH1.textContent = 'Merci pour votre réservation !';
+    headerSubtitle.classList.add('hidden');
+  } else {
+    headerH1.textContent = 'Nos ateliers';
+    headerSubtitle.classList.remove('hidden');
+  }
 
   switch (section) {
     case 'cartes':

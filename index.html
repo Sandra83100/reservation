@@ -7,15 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body>
 
   <header>
     <div class="header-inner">
       <img src="logo-ecoferme.png" alt="Écoferme départementale de la Barre" height="70" class="header-logo">
-      <h1>Nos ateliers</h1>
-      <p class="subtitle">Venez vivre une expérience unique au cœur de la nature — ateliers 100% gratuits, réservez votre place en quelques clics !</p>
+      <h1 id="header-h1">Nos ateliers</h1>
+      <p class="subtitle" id="header-subtitle">Venez vivre une expérience unique au cœur de la nature — ateliers 100% gratuits, réservez votre place en quelques clics !</p>
     </div>
   </header>
 
@@ -138,10 +138,61 @@
     <!-- ─── CONFIRMATION FINALE ─────────────────────────────── -->
     <section id="confirmation-section" class="confirmation-section hidden">
       <div class="confirmation-card">
-        <div class="confirmation-icone">🎉</div>
-        <h2>Réservation confirmée !</h2>
-        <p id="confirmation-message"></p>
-        <button id="btn-nouvelle-resa" class="btn-principal">Réserver un autre atelier</button>
+        <div class="confirmation-photo-wrap">
+          <img id="confirmation-photo" src="" alt="" class="confirmation-photo" />
+        </div>
+        <div class="confirmation-card-body">
+          <h2>Réservation confirmée !</h2>
+          <div class="confirmation-recap">
+            <div class="recap-ligne">
+              <span class="recap-icone">🎪</span>
+              <div class="recap-info">
+                <span class="recap-label">Atelier</span>
+                <span class="recap-valeur" id="conf-atelier"></span>
+              </div>
+            </div>
+            <div class="recap-ligne">
+              <span class="recap-icone">📅</span>
+              <div class="recap-info">
+                <span class="recap-label">Date</span>
+                <span class="recap-valeur" id="conf-date"></span>
+              </div>
+            </div>
+            <div class="recap-ligne">
+              <span class="recap-icone">🕐</span>
+              <div class="recap-info">
+                <span class="recap-label">Horaire</span>
+                <span class="recap-valeur" id="conf-horaire"></span>
+              </div>
+            </div>
+            <div class="recap-ligne">
+              <span class="recap-icone">👤</span>
+              <div class="recap-info">
+                <span class="recap-label">Réservé par</span>
+                <span class="recap-valeur" id="conf-nom"></span>
+              </div>
+            </div>
+            <div class="recap-ligne">
+              <span class="recap-icone">👥</span>
+              <div class="recap-info">
+                <span class="recap-label">Participants</span>
+                <span class="recap-valeur" id="conf-participants"></span>
+              </div>
+            </div>
+            <div class="recap-ligne">
+              <span class="recap-icone">📍</span>
+              <div class="recap-info">
+                <span class="recap-label">Adresse</span>
+                <span class="recap-valeur">55 allée Georges Leygues, Toulon</span>
+              </div>
+            </div>
+          </div>
+          <p class="confirmation-email-note">
+            Un email de confirmation vous a été envoyé. Si vous ne le trouvez pas dans votre boîte de réception, pensez à vérifier votre dossier « Courrier indésirable » ou « Spams ».
+          </p>
+          <button id="btn-nouvelle-resa" class="btn-principal btn-confirmation-full">Réserver un autre atelier</button>
+          <a href="#" id="lien-retour-accueil" class="confirmation-lien-accueil">Retour à l'accueil</a>
+        </div>
       </div>
     </section>
 
@@ -163,6 +214,6 @@
     <p>Les champs marqués <span class="obligatoire">*</span> sont obligatoires.</p>
   </footer>
 
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>
