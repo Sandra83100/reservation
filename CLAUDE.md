@@ -82,10 +82,10 @@ Ou utiliser la commande Claude Code : preview_start "site-ateliers"
 
 ---
 
-## État du déploiement (3 mars 2026)
+## État du déploiement (6 mars 2026)
 
 - **GitHub Pages** : https://sandra83100.github.io/reservation/ (branche `main`)
-- **Apps Script** : Version 19 déployée (3 mars 2026, 23:21)
+- **Apps Script** : Version 23 déployée (6 mars 2026)
 - **Nom du projet Apps Script** : "Réservation Ateliers Écoferme"
 - **Branche unique** : tout le travail est sur `main`
 
