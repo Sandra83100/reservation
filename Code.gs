@@ -400,6 +400,9 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
       + '&details='  + encodeURIComponent('Réservation confirmée à l\'Écoferme du Var')
       + '&location=' + encodeURIComponent('265 allée Georges Leygues 83000 Toulon');
 
+    // --- URL ICS (Apple Calendar / Outlook) ---
+    const icsUrl = SCRIPT_URL + '?action=ics&id=' + atelier.id;
+
     // --- Labels âge ---
     const labelsAge = {
       'moins-3ans': 'Moins de 3 ans',
@@ -407,39 +410,43 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
       'plus-10ans': 'Plus de 10 ans'
     };
 
-    // --- URL fichier ICS (Apple Calendar / Outlook) ---
-    const icsUrl = SCRIPT_URL + '?action=ics&id=' + atelier.id;
+    // --- Photo de l'atelier (URL absolue publique) ---
+    // ⚠️ Remplacer les URL picsum par les vraies photos quand disponibles
+    const PHOTOS_ATELIERS = {
+      'Rencontre avec les animaux':      'https://sandra83100.github.io/reservation/images/animaux/Fine1.jpg',
+      "Mémoires de l'écoferme":          'https://picsum.photos/seed/ferme77/700/400',
+      "Visite découverte de l'Écoferme": 'https://picsum.photos/seed/ecoferme33/700/400'
+    };
+    const photoUrl   = PHOTOS_ATELIERS[atelier.nom] || '';
+    const photoBlock = photoUrl
+      ? `<tr>
+           <td style="padding:0;line-height:0;">
+             <img src="${photoUrl}" alt="${escapeHtml(atelier.nom)}" width="600"
+               style="display:block;width:100%;max-height:220px;object-fit:cover;">
+           </td>
+         </tr>`
+      : '';
 
-    // --- Bloc participants ---
-    let participantsHtml = '';
+    // --- Ligne participants (intégrée dans le récapitulatif) ---
+    let participantsLigne = '';
     if (agesEnfants && agesEnfants.length > 0) {
       const nbEnfants  = agesEnfants.length;
       const lignesAges = agesEnfants
-        .map((a, i) => `Enfant ${i + 1} — tranche d'âge : ${labelsAge[a] || a}`)
+        .map((a, i) => `Enfant ${i + 1}&nbsp;&mdash;&nbsp;${labelsAge[a] || a}`)
         .join('<br>');
-      participantsHtml = `
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:#E8F5EB;border-left:4px solid #1F6B2E;border-radius:4px;margin-bottom:20px;">
-          <tr>
-            <td style="padding:15px 20px;font-size:15px;color:#333;">
-              <strong>Participants réservés :</strong><br>
-              1 adulte et ${nbEnfants} enfant${nbEnfants > 1 ? 's' : ''}<br>
-              <span style="color:#555;">${lignesAges}</span>
-            </td>
-          </tr>
-        </table>`;
+      participantsLigne = `
+              <p style="margin:0 0 5px;font-size:15px;color:#555;">👥 &nbsp;1 adulte et ${nbEnfants} enfant${nbEnfants > 1 ? 's' : ''}</p>
+              <p style="margin:0 0 5px;font-size:13px;color:#777;padding-left:24px;">${lignesAges}</p>`;
     } else if (nbPersonnes && nbPersonnes > 0) {
-      participantsHtml = `
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:#E8F5EB;border-left:4px solid #1F6B2E;border-radius:4px;margin-bottom:20px;">
-          <tr>
-            <td style="padding:15px 20px;font-size:15px;color:#333;">
-              <strong>Participants réservés :</strong> ${nbPersonnes} personne${nbPersonnes > 1 ? 's' : ''}
-            </td>
-          </tr>
-        </table>`;
+      participantsLigne = `
+              <p style="margin:0 0 5px;font-size:15px;color:#555;">👥 &nbsp;${nbPersonnes} personne${nbPersonnes > 1 ? 's' : ''}</p>`;
     }
 
     // -------------------------------------------------------
-    //  CORPS DE L'EMAIL
+    //  CORPS DE L'EMAIL  (ordre des blocs : A B C E D F G)
+    //  A = En-tête + photo   B = Accueil   C = Récap complet
+    //  E = Annulation        D = Agenda    F = Courtoisie
+    //  G = Footer
     // -------------------------------------------------------
     const corps = `<!DOCTYPE html>
 <html lang="fr">
@@ -449,39 +456,51 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
 
-        <!-- En-tête -->
+        <!-- BLOC A — En-tête visuel : logo + titre -->
         <tr>
           <td style="background:#1F6B2E;padding:24px 40px;text-align:center;">
             <img src="https://URL-DU-LOGO-A-REMPLACER.png" alt="Écoferme départementale de la Barre" height="60" style="display:block;margin:0 auto 12px auto;">
-            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:normal;">🌿 Réservation confirmée</h1>
+            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:normal;">🎉 Réservation confirmée</h1>
           </td>
         </tr>
 
-        <!-- Corps -->
+        <!-- BLOC A (suite) — Photo de l'atelier réservé -->
+        ${photoBlock}
+
+        <!-- BLOCS B·C·E·D·F — Corps principal -->
         <tr>
           <td style="padding:35px 40px;">
 
-            <p style="margin:0 0 20px;font-size:16px;color:#333;">Bonjour <strong>${escapeHtml(nom)}</strong>,</p>
-            <p style="margin:0 0 25px;font-size:16px;color:#333;line-height:1.6;">
-              Votre réservation est bien confirmée. Nous avons hâte de vous accueillir à l'Écoferme départementale de la Barre !
+            <!-- BLOC B — Message d'accueil -->
+            <p style="margin:0 0 8px;font-size:16px;color:#333;">Bonjour <strong>${escapeHtml(nom)}</strong>,</p>
+            <p style="margin:0 0 28px;font-size:16px;color:#333;line-height:1.6;">
+              Votre réservation est bien confirmée. Nous avons hâte de vous accueillir à l'Écoferme départementale de la Barre&nbsp;!
             </p>
 
-            <!-- Récap atelier -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#E8F5EB;border-left:4px solid #1F6B2E;border-radius:4px;margin-bottom:16px;">
+            <!-- BLOC C — Récapitulatif complet -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#E8F5EB;border-left:4px solid #1F6B2E;border-radius:4px;margin-bottom:20px;">
               <tr>
                 <td style="padding:20px 25px;">
-                  <p style="margin:0 0 8px;font-size:18px;color:#1F6B2E;font-weight:bold;">${escapeHtml(atelier.nom)}</p>
+                  <p style="margin:0 0 10px;font-size:18px;color:#1F6B2E;font-weight:bold;">${escapeHtml(atelier.nom)}</p>
                   <p style="margin:0 0 5px;font-size:15px;color:#555;">📅 &nbsp;${dateLisible}</p>
-                  <p style="margin:0;font-size:15px;color:#555;">🕐 &nbsp;${atelier.debut} – ${atelier.fin}</p>
+                  <p style="margin:0 0 5px;font-size:15px;color:#555;">🕐 &nbsp;${atelier.debut} – ${atelier.fin}</p>
+                  <p style="margin:0 0 5px;font-size:15px;color:#555;">👤 &nbsp;${escapeHtml(nom)}</p>
+                  ${participantsLigne}
+                  <p style="margin:0;font-size:15px;color:#555;">📍 &nbsp;55 allée Georges Leygues, 83000 Toulon</p>
                 </td>
               </tr>
             </table>
 
-            <!-- Boutons Agenda (3 choix) -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
+            <!-- BLOC E — Lien d'annulation (discret, avant l'agenda) -->
+            <p style="text-align:center;margin:0 0 32px;">
+              <a href="${cancelUrl}" style="font-size:13px;color:#888888;text-decoration:underline;">Un empêchement&nbsp;? J'annule ma réservation</a>
+            </p>
+
+            <!-- BLOC D — Ajouter à mon agenda (titre plus grand, espacement généreux) -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
               <tr>
                 <td align="center">
-                  <p style="margin:0 0 10px;font-size:12px;color:#777;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">📅 Ajouter à mon agenda</p>
+                  <p style="margin:0 0 14px;font-size:15px;color:#333;font-weight:bold;text-transform:uppercase;letter-spacing:0.8px;">📅 Ajouter à mon agenda</p>
                   <table cellpadding="0" cellspacing="0">
                     <tr>
                       <td style="padding:0 4px 0 0;">
@@ -499,32 +518,20 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
               </tr>
             </table>
 
-            <!-- Bouton Annuler -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-              <tr>
-                <td align="center">
-                  <a href="${cancelUrl}" style="display:inline-block;padding:12px 20px;background:#ffffff;border:2px solid #C0392B;color:#C0392B;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;">✖ Annuler ma réservation</a>
-                </td>
-              </tr>
-            </table>
-
-            <!-- Participants -->
-            ${participantsHtml}
-
-            <!-- Contact -->
+            <!-- BLOC F — Message de courtoisie + coordonnées -->
             <p style="margin:0 0 10px;font-size:15px;color:#555;line-height:1.6;">
-              Pour toute question, contactez-nous au
-              <a href="tel:+33498009570" style="color:#1F6B2E;font-weight:bold;text-decoration:none;">04 98 00 95 70</a>
-              ou à <a href="mailto:ecoferme@var.fr" style="color:#1F6B2E;text-decoration:underline;">ecoferme@var.fr</a>.
+              En cas d'empêchement, afin que chacun puisse bénéficier de cette belle expérience, merci de bien vouloir nous en informer (via le lien ci-dessus, par mail ou par téléphone).
             </p>
-            <p style="margin:0 0 0;font-size:14px;color:#555;line-height:1.4;">
-              En cas d'empêchement, afin que chacun puisse bénéficier de cette belle expérience, merci de bien vouloir nous en informer (via le bouton annuler ma réservation, par mail ou par téléphone).
+            <p style="margin:0;font-size:15px;color:#555;line-height:1.6;">
+              <a href="tel:+33498009570" style="color:#1F6B2E;font-weight:bold;text-decoration:none;">📞 04 98 00 95 70</a>
+              &nbsp;&nbsp;
+              <a href="mailto:ecoferme@var.fr" style="color:#1F6B2E;text-decoration:underline;">ecoferme@var.fr</a>
             </p>
 
           </td>
         </tr>
 
-        <!-- Pied de page -->
+        <!-- BLOC G — Footer -->
         <tr>
           <td style="background:#E8F5EB;padding:25px 40px;text-align:center;">
 
