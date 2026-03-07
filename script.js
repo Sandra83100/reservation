@@ -91,6 +91,10 @@ function bindEvents() {
     e.target.value = formatted;
   });
 
+  // Stepper personnes animaux
+  document.getElementById('stepper-personnes-moins').addEventListener('click', () => changerNbPersonnesAnimaux(-1));
+  document.getElementById('stepper-personnes-plus').addEventListener('click',  () => changerNbPersonnesAnimaux(+1));
+
   // Stepper enfants (Fiche #02)
   document.getElementById('stepper-moins').addEventListener('click', () => changerNbEnfants(-1));
   document.getElementById('stepper-plus').addEventListener('click',  () => changerNbEnfants(+1));
@@ -335,12 +339,16 @@ function ouvrirFormulaire(atelier) {
   document.getElementById('section-animaux').classList.toggle('hidden', !estAnimaux);
   document.getElementById('ages-enfants').innerHTML = '';
 
-  // Initialiser le stepper enfants (Fiche #02)
+  // Initialiser les steppers animaux
   if (estAnimaux) {
-    document.getElementById('nb-enfants').value = '1';
-    document.getElementById('nb-enfants-val').textContent = '1';
+    document.getElementById('nb-personnes-animaux').value = '1';
+    document.getElementById('nb-personnes-animaux-val').textContent = '1';
+    document.getElementById('stepper-personnes-moins').disabled = true;
+    document.getElementById('stepper-personnes-plus').disabled = false;
+    document.getElementById('nb-enfants').value = '0';
+    document.getElementById('nb-enfants-val').textContent = '0';
     document.getElementById('stepper-moins').disabled = true;
-    document.getElementById('stepper-plus').disabled = false;
+    document.getElementById('stepper-plus').disabled = true; // 1 personne = 0 enfants max
     genererAgesEnfants();
   }
 
@@ -352,20 +360,47 @@ function ouvrirFormulaire(atelier) {
 }
 
 // ============================================================
-//  STEPPER NOMBRE D'ENFANTS — Fiche #02
+//  STEPPERS ANIMAUX — Fiche #02
 // ============================================================
-const STEPPER_MIN = 1;
-const STEPPER_MAX = 7; // 1 adulte obligatoire + 7 enfants max = 8 places max
+const STEPPER_PERSONNES_MIN = 1;
+const STEPPER_PERSONNES_MAX = 4;
+const STEPPER_ENFANTS_MIN   = 0;
 
-function changerNbEnfants(delta) {
-  const input  = document.getElementById('nb-enfants');
-  const valAff = document.getElementById('nb-enfants-val');
-  let val = parseInt(input.value) || STEPPER_MIN;
-  val = Math.min(STEPPER_MAX, Math.max(STEPPER_MIN, val + delta));
+function changerNbPersonnesAnimaux(delta) {
+  const input  = document.getElementById('nb-personnes-animaux');
+  const valAff = document.getElementById('nb-personnes-animaux-val');
+  let val = parseInt(input.value) || STEPPER_PERSONNES_MIN;
+  val = Math.min(STEPPER_PERSONNES_MAX, Math.max(STEPPER_PERSONNES_MIN, val + delta));
   input.value = String(val);
   valAff.textContent = val;
-  document.getElementById('stepper-moins').disabled = (val <= STEPPER_MIN);
-  document.getElementById('stepper-plus').disabled  = (val >= STEPPER_MAX);
+  document.getElementById('stepper-personnes-moins').disabled = (val <= STEPPER_PERSONNES_MIN);
+  document.getElementById('stepper-personnes-plus').disabled  = (val >= STEPPER_PERSONNES_MAX);
+
+  // Recalculer le max enfants et recadrer si besoin
+  const maxEnfants = val - 1;
+  const inputE = document.getElementById('nb-enfants');
+  let nbE = parseInt(inputE.value) || 0;
+  if (nbE > maxEnfants) {
+    nbE = maxEnfants;
+    inputE.value = String(nbE);
+    document.getElementById('nb-enfants-val').textContent = nbE;
+    genererAgesEnfants();
+  }
+  document.getElementById('stepper-moins').disabled = (nbE <= STEPPER_ENFANTS_MIN);
+  document.getElementById('stepper-plus').disabled  = (nbE >= maxEnfants) || (maxEnfants === 0);
+}
+
+function changerNbEnfants(delta) {
+  const input     = document.getElementById('nb-enfants');
+  const valAff    = document.getElementById('nb-enfants-val');
+  const nbPersonnes = parseInt(document.getElementById('nb-personnes-animaux').value) || STEPPER_PERSONNES_MIN;
+  const maxEnfants  = nbPersonnes - 1;
+  let val = parseInt(input.value) || STEPPER_ENFANTS_MIN;
+  val = Math.min(maxEnfants, Math.max(STEPPER_ENFANTS_MIN, val + delta));
+  input.value = String(val);
+  valAff.textContent = val;
+  document.getElementById('stepper-moins').disabled = (val <= STEPPER_ENFANTS_MIN);
+  document.getElementById('stepper-plus').disabled  = (val >= maxEnfants) || (maxEnfants === 0);
   genererAgesEnfants();
 }
 
@@ -422,12 +457,16 @@ async function soumettreReservation(e) {
   const estAnimaux = atelierSelectionne.nom === NOM_ATELIER_ANIMAUX;
 
   if (estAnimaux) {
+    const nbPersonnesAnimaux = parseInt(document.getElementById('nb-personnes-animaux').value) || 0;
     const nbEnfants = parseInt(document.getElementById('nb-enfants').value) || 0;
-    if (!nbEnfants) {
-      afficherErreurChamp('nb-enfants', 'Veuillez indiquer le nombre d\'enfants.');
+    if (!nbPersonnesAnimaux) {
+      afficherErreurChamp('nb-personnes-animaux', 'Veuillez indiquer le nombre de participants.');
+      valide = false;
+    } else if (nbEnfants > 0 && nbEnfants >= nbPersonnesAnimaux) {
+      afficherErreurChamp('nb-enfants', 'Au moins un adulte est obligatoire lorsqu\'il y a des enfants.');
       valide = false;
     } else {
-      // Valider l'âge de chaque enfant
+      // Valider l'âge de chaque enfant si présents
       for (let i = 1; i <= nbEnfants; i++) {
         const sel = document.getElementById(`age-enfant-${i}`);
         if (!sel || !sel.value) {
@@ -435,7 +474,7 @@ async function soumettreReservation(e) {
           valide = false;
         }
       }
-      nbPersonnes = nbEnfants + 1; // enfants + 1 adulte obligatoire
+      nbPersonnes = nbPersonnesAnimaux;
     }
   } else {
     nbPersonnes = parseInt(document.getElementById('nb-personnes').value) || 0;

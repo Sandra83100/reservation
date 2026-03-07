@@ -72,20 +72,30 @@
           <div class="animaux-alerte">
             <span class="animaux-alerte-icone">ℹ️</span>
             <div>
-              <strong>Un adulte accompagnant est obligatoire</strong> pour chaque session.<br>
-              L'adulte sera compté dans les places réservées.
+              <strong>Si des enfants participent, un adulte accompagnant est obligatoire.</strong><br>
+              Tous les participants comptent pour une place.
             </div>
           </div>
 
           <div class="champ">
-            <label>Nombre d'enfants <span class="obligatoire">*</span></label>
+            <label>Nombre de personnes <span class="obligatoire">*</span></label>
+            <div class="stepper" id="stepper-nb-personnes-animaux">
+              <button type="button" class="stepper-btn" id="stepper-personnes-moins" disabled>−</button>
+              <span class="stepper-val" id="nb-personnes-animaux-val">1</span>
+              <button type="button" class="stepper-btn" id="stepper-personnes-plus">+</button>
+            </div>
+            <input type="hidden" id="nb-personnes-animaux" name="nbPersonnesAnimaux" value="1" />
+            <span class="erreur-champ" id="erreur-nb-personnes-animaux"></span>
+          </div>
+
+          <div class="champ">
+            <label>Nombre d'enfants</label>
             <div class="stepper" id="stepper-nb-enfants">
               <button type="button" class="stepper-btn" id="stepper-moins" disabled>−</button>
-              <span class="stepper-val" id="nb-enfants-val">1</span>
+              <span class="stepper-val" id="nb-enfants-val">0</span>
               <button type="button" class="stepper-btn" id="stepper-plus">+</button>
             </div>
-            <input type="hidden" id="nb-enfants" name="nbEnfants" value="1" />
-            <p class="champ-note">L'adulte accompagnant compte pour 1 place.</p>
+            <input type="hidden" id="nb-enfants" name="nbEnfants" value="0" />
             <span class="erreur-champ" id="erreur-nb-enfants"></span>
           </div>
 
