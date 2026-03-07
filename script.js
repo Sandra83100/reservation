@@ -53,6 +53,12 @@ let atelierSelectionne = null;
 //  INITIALISATION
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+  // Annulation depuis un lien email ?
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('action') === 'annuler') {
+    gererAnnulationUrl(urlParams.get('token'));
+    return;
+  }
   bindEvents();
   chargerAteliers();
   // Rafraîchit les places restantes toutes les 30s, uniquement sur la page des cartes
@@ -62,6 +68,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 30000);
 });
+
+async function gererAnnulationUrl(token) {
+  document.getElementById('cartes-section').classList.add('hidden');
+  document.getElementById('annulation-section').classList.remove('hidden');
+  try {
+    const url = APPS_SCRIPT_URL + '?action=annulerJson&token=' + encodeURIComponent(token || '');
+    const resp = await fetch(url);
+    const data = await resp.json();
+    document.getElementById('annulation-en-cours').classList.add('hidden');
+    if (data.status === 'ok') {
+      document.getElementById('annulation-ok').classList.remove('hidden');
+    } else {
+      document.getElementById('annulation-erreur').classList.remove('hidden');
+      document.getElementById('annulation-erreur-msg').textContent = data.message || 'Une erreur est survenue.';
+    }
+  } catch (err) {
+    document.getElementById('annulation-en-cours').classList.add('hidden');
+    document.getElementById('annulation-erreur').classList.remove('hidden');
+    document.getElementById('annulation-erreur-msg').textContent = 'Impossible de contacter le serveur.';
+  }
+}
 
 function bindEvents() {
   document.getElementById('btn-annuler').addEventListener('click', () => afficherSection('cartes'));

@@ -103,6 +103,7 @@ function doGet(e) {
     const action = e && e.parameter && e.parameter.action;
     if (action === 'getAteliers') return jsonResponse(getAteliers());
     if (action === 'annuler')     return handleAnnulation(e.parameter.token);
+    if (action === 'annulerJson') return handleAnnulationJson(e.parameter.token);
     if (action === 'ics')         return generateIcs(e.parameter.id);
     return jsonResponse({ status: 'ok', message: 'API de réservation opérationnelle' });
   } catch (err) {
@@ -209,6 +210,39 @@ function handleAnnulation(token) {
 
   } catch (err) {
     return page('Erreur', 'Une erreur est survenue : ' + escapeHtml(err.message), '#C0392B');
+  }
+}
+
+// ============================================================
+//  ANNULATION JSON — appelé depuis le frontend GitHub Pages
+// ============================================================
+
+function handleAnnulationJson(token) {
+  try {
+    if (!token) return jsonResponse({ status: 'error', message: 'Lien invalide.' });
+
+    const paddedToken = token + '==='.slice(0, (4 - token.length % 4) % 4);
+    const decoded     = Utilities.newBlob(Utilities.base64DecodeWebSafe(paddedToken)).getDataAsString();
+    const parts       = decoded.split('|');
+    if (parts.length < 2) return jsonResponse({ status: 'error', message: 'Lien invalide ou expiré.' });
+
+    const email     = parts[0];
+    const atelierId = parts[1];
+
+    const sheet        = getSheet(ONGLET_RESERVATIONS);
+    const reservations = sheetToObjects(sheet);
+    const found        = reservations.find(r =>
+      r['Email'] && r['Email'].toString().toLowerCase().trim() === email.toLowerCase().trim() &&
+      String(r['ID Atelier']) === String(atelierId)
+    );
+
+    if (!found) return jsonResponse({ status: 'error', message: 'Cette réservation est introuvable ou a déjà été annulée.' });
+
+    sheet.deleteRow(found._row);
+    return jsonResponse({ status: 'ok', message: 'Réservation annulée.' });
+
+  } catch (err) {
+    return jsonResponse({ status: 'error', message: 'Erreur : ' + err.message });
   }
 }
 
@@ -433,9 +467,9 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
     const dateLisible = formatDateLisible(atelier.date);
     const sujet       = `✅ Confirmation — ${atelier.nom} le ${dateLisible}`;
 
-    // --- Token annulation (sans padding = pour éviter les problèmes dans les URLs) ---
+    // --- Token annulation — lien vers GitHub Pages (évite le problème Drive de Gmail) ---
     const token     = Utilities.base64EncodeWebSafe(email + '|' + atelier.id).replace(/=+$/, '');
-    const cancelUrl = SCRIPT_URL + '?action=annuler&token=' + token;
+    const cancelUrl = 'https://sandra83100.github.io/reservation/?action=annuler&token=' + token;
 
     // --- URL Google Calendar ---
     const gcalStart = dateToGcal(atelier.date, atelier.debut);
