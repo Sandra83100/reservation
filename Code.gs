@@ -517,32 +517,38 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
           <td style="padding:35px 40px;">
 
             <!-- BLOC B — Message d'accueil -->
-            <p style="margin:0 0 8px;font-size:16px;color:#333;">Bonjour <strong>${escapeHtml(nom)}</strong>,</p>
-            <p style="margin:0 0 28px;font-size:16px;color:#333;line-height:1.6;">
-              Votre réservation est bien confirmée. Nous avons hâte de vous accueillir à l'Écoferme départementale de la Barre&nbsp;!
-            </p>
+            <p style="margin:0 0 6px;font-size:16px;color:#333;">Bonjour <strong>${escapeHtml(nom)}</strong>,</p>
+            <p style="margin:0 0 6px;font-size:16px;color:#333;line-height:1.6;">Votre réservation est bien confirmée.</p>
+            <p style="margin:0 0 24px;font-size:16px;color:#333;line-height:1.6;">Nous avons hâte de vous accueillir à l'Écoferme départementale de la Barre&nbsp;!</p>
 
             <!-- BLOC C — Récapitulatif complet -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#E8F5EB;border-left:4px solid #1F6B2E;border-radius:4px;margin-bottom:20px;">
               <tr>
                 <td style="padding:20px 25px;">
                   <p style="margin:0 0 10px;font-size:18px;color:#1F6B2E;font-weight:bold;">${escapeHtml(atelier.nom)}</p>
-                  <p style="margin:0 0 5px;font-size:15px;color:#555;">📅 &nbsp;${dateLisible}</p>
-                  <p style="margin:0 0 5px;font-size:15px;color:#555;">🕐 &nbsp;${atelier.debut} – ${atelier.fin}</p>
-                  <p style="margin:0 0 5px;font-size:15px;color:#555;">👤 &nbsp;${escapeHtml(nom)}</p>
+                  <p style="margin:0 0 5px;font-size:16px;color:#555;">📅 &nbsp;${dateLisible}</p>
+                  <p style="margin:0 0 5px;font-size:16px;color:#555;">🕐 &nbsp;${atelier.debut} – ${atelier.fin}</p>
+                  <p style="margin:0 0 5px;font-size:16px;color:#555;">👤 &nbsp;${escapeHtml(nom)}</p>
                   ${participantsLigne}
-                  <p style="margin:0;font-size:15px;color:#555;">📍 &nbsp;<a href="https://maps.google.com/?q=265+allée+Georges+Leygues+83000+Toulon" style="color:#1F6B2E;text-decoration:underline;">Écoferme, 55, allée Georges Leygues, 83000 Toulon</a></p>
+                  <p style="margin:0;font-size:16px;color:#555;">📍 &nbsp;<a href="https://maps.google.com/?q=265+allée+Georges+Leygues+83000+Toulon" style="color:#1F6B2E;text-decoration:underline;">Écoferme, 55, allée Georges Leygues, 83000 Toulon</a></p>
                 </td>
               </tr>
             </table>
 
-            <!-- BLOC E — Lien d'annulation (discret, avant l'agenda) -->
-            <p style="text-align:center;margin:0 0 32px;">
-              <a href="${cancelUrl}" style="font-size:13px;color:#888888;text-decoration:underline;">Un empêchement&nbsp;? J'annule ma réservation</a>
-            </p>
+            <!-- BLOC E — Empêchement + annulation (juste après l'encart) -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8f0;border:1px solid #f0dcc8;border-radius:8px;margin-bottom:28px;">
+              <tr>
+                <td style="padding:18px 24px;text-align:center;">
+                  <p style="margin:0 0 14px;font-size:15px;color:#555;line-height:1.6;">
+                    En cas d'empêchement, afin que chacun puisse bénéficier de cette belle expérience, merci de bien vouloir nous en informer.
+                  </p>
+                  <a href="${cancelUrl}" style="display:inline-block;padding:10px 22px;background:#f5f5f5;border:1.5px solid #bbb;color:#444;border-radius:6px;text-decoration:none;font-size:15px;font-weight:bold;">✖ Annuler ma réservation</a>
+                </td>
+              </tr>
+            </table>
 
-            <!-- BLOC D — Ajouter à mon agenda (titre plus grand, espacement généreux) -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+            <!-- BLOC D — Ajouter à mon agenda (en bas du bloc blanc) -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
               <tr>
                 <td align="center">
                   <p style="margin:0 0 14px;font-size:15px;color:#333;font-weight:bold;text-transform:uppercase;letter-spacing:0.8px;">📅 Ajouter à mon agenda</p>
@@ -563,16 +569,6 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
               </tr>
             </table>
 
-            <!-- BLOC F — Message de courtoisie + coordonnées -->
-            <p style="margin:0 0 10px;font-size:15px;color:#555;line-height:1.6;">
-              En cas d'empêchement, afin que chacun puisse bénéficier de cette belle expérience, merci de bien vouloir nous en informer (via le lien ci-dessus, par mail ou par téléphone).
-            </p>
-            <p style="margin:0;font-size:15px;color:#555;line-height:1.6;">
-              <a href="tel:+33498009570" style="color:#1F6B2E;font-weight:bold;text-decoration:none;">📞 04 98 00 95 70</a>
-              &nbsp;&nbsp;
-              <a href="mailto:ecoferme@var.fr" style="color:#1F6B2E;text-decoration:underline;">ecoferme@var.fr</a>
-            </p>
-
           </td>
         </tr>
 
@@ -592,8 +588,8 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
 
             <!-- Facebook -->
             <p style="margin:0 0 20px;">
-              <a href="https://www.facebook.com/ecofermedepartementaledelabarre/" style="display:inline-flex;align-items:center;gap:8px;color:#1877F2;text-decoration:none;font-size:14px;">
-                <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#1877F2;border-radius:4px;color:#ffffff;font-weight:bold;font-size:13px;line-height:1;">f</span>
+              <a href="https://www.facebook.com/ecofermedepartementaledelabarre/" style="display:inline-flex;align-items:center;gap:8px;color:#3b5998;text-decoration:none;font-size:14px;">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3b5998;border-radius:4px;color:#ffffff;font-weight:bold;font-size:13px;line-height:1;">f</span>
                 Suivez notre actualité sur Facebook
               </a>
             </p>
