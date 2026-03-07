@@ -825,6 +825,16 @@ main {
 }
 
 /* Message email + avertissement spams */
+.newsletter-deja-inscrit {
+  font-size: .85rem;
+  color: #1F6B2E;
+  background: #E8F5E9;
+  border-radius: 8px;
+  padding: .6rem 1rem;
+  margin-bottom: .8rem;
+  text-align: left;
+}
+
 .confirmation-email-note {
   font-family: 'Nunito', Verdana, sans-serif;
   font-size: .8rem;
