@@ -55,6 +55,12 @@ let atelierSelectionne = null;
 document.addEventListener('DOMContentLoaded', () => {
   bindEvents();
   chargerAteliers();
+  // Rafraîchit les places restantes toutes les 30s, uniquement sur la page des cartes
+  setInterval(() => {
+    if (!document.getElementById('cartes-section').classList.contains('hidden')) {
+      chargerAteliers();
+    }
+  }, 30000);
 });
 
 function bindEvents() {
@@ -103,7 +109,7 @@ async function chargerAteliers() {
   afficherLoader(true);
   masquerErreurGlobale();
   try {
-    const resp = await fetch(`${APPS_SCRIPT_URL}?action=getAteliers`);
+    const resp = await fetch(`${APPS_SCRIPT_URL}?action=getAteliers`, { cache: 'no-store' });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     if (data.error) throw new Error(data.error);
@@ -460,6 +466,7 @@ async function soumettreReservation(e) {
         atelierId: atelierSelectionne.id,
         nom, email, tel,
         nbPersonnes,
+        newsletter: document.getElementById('newsletter').checked,
         ...(estAnimaux && { agesEnfants })
       })
     });
@@ -492,6 +499,13 @@ async function soumettreReservation(e) {
     document.getElementById('conf-nom').textContent = nom;
     document.getElementById('conf-participants').textContent =
       `${nbPersonnes} personne${nbPersonnes > 1 ? 's' : ''}`;
+
+    const msgNewsletter = document.getElementById('newsletter-deja-inscrit');
+    if (data.dejaInscritNewsletter) {
+      msgNewsletter.classList.remove('hidden');
+    } else {
+      msgNewsletter.classList.add('hidden');
+    }
 
     afficherSection('confirmation');
 
