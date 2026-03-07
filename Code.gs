@@ -4,6 +4,7 @@
 const SHEET_ID            = '1x6_cgQwlZaY6p8wAr6_VtGjdRiuEjWpnMWvUAh-Rh1k';
 const ONGLET_ATELIERS     = 'Ateliers';
 const ONGLET_RESERVATIONS = 'Réservations';
+const ONGLET_NEWSLETTER   = 'Inscriptions newsletter';
 const SCRIPT_URL          = 'https://script.google.com/macros/s/AKfycbwXsam9kpgaGdwVbf0LYkqBpgFayk9dexy6y2CyeSvwVqvWB-SMGbrDF5Hn4m2AJKoB/exec';
 
 // ============================================================
@@ -254,7 +255,7 @@ function doPost(e) {
     if (!e || !e.postData) return jsonResponse({ error: 'Requête invalide' });
 
     const body = JSON.parse(e.postData.contents);
-    const { atelierId, nom, email, tel, nbPersonnes, agesEnfants } = body;
+    const { atelierId, nom, email, tel, nbPersonnes, newsletter, agesEnfants } = body;
 
     if (!atelierId || !nom || !email || !tel) {
       return jsonResponse({ error: 'Tous les champs sont obligatoires.' });
@@ -298,9 +299,15 @@ function doPost(e) {
     appliquerZebrage(sheet, sheet.getLastRow());
     envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants);
 
+    let dejaInscritNewsletter = false;
+    if (newsletter === true) {
+      dejaInscritNewsletter = enregistrerNewsletter(email, nom, atelier.nom);
+    }
+
     return jsonResponse({
       success: true,
-      message: `Votre place pour "${atelier.nom}" le ${atelier.date} de ${atelier.debut} à ${atelier.fin} est confirmée !`
+      message: `Votre place pour "${atelier.nom}" le ${atelier.date} de ${atelier.debut} à ${atelier.fin} est confirmée !`,
+      dejaInscritNewsletter
     });
 
   } catch (err) {
@@ -312,11 +319,49 @@ function doPost(e) {
 //  INITIALISATION
 // ============================================================
 
+function enregistrerNewsletter(email, nom, atelierNom) {
+  const ss    = getSpreadsheet();
+  let sheet   = ss.getSheetByName(ONGLET_NEWSLETTER);
+  if (!sheet) sheet = creerOngletNewsletter(ss);
+
+  // Anti-doublon : ne pas inscrire deux fois le même email
+  const existants = sheetToObjects(sheet);
+  const dejaInscrit = existants.some(r =>
+    r['Email'] && r['Email'].toString().toLowerCase().trim() === email.toLowerCase().trim()
+  );
+  if (dejaInscrit) return true; // déjà inscrit
+
+  const now = new Date();
+  sheet.appendRow([
+    Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm'),
+    nom, email, atelierNom
+  ]);
+  appliquerZebrage(sheet, sheet.getLastRow());
+  return false; // nouvel inscrit
+}
+
+function creerOngletNewsletter(ss) {
+  let sheet = ss.getSheetByName(ONGLET_NEWSLETTER);
+  if (!sheet) sheet = ss.insertSheet(ONGLET_NEWSLETTER);
+  sheet.clearFormats();
+  sheet.clearContents();
+
+  const headers = ['Date inscription', 'Prénom / Nom', 'Email', 'Via atelier'];
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  sheet.getRange(1, 1, 1, headers.length)
+    .setBackground('#1F6B2E').setFontColor('#FFFFFF')
+    .setFontWeight('bold').setHorizontalAlignment('center');
+  sheet.setFrozenRows(1);
+  [140, 180, 220, 200].forEach((w, i) => sheet.setColumnWidth(i + 1, w));
+  return sheet;
+}
+
 function initialiserSheet() {
   const ss = getSpreadsheet();
   creerOngletAteliers(ss);
   creerOngletReservations(ss);
-  SpreadsheetApp.getUi().alert('✅ Initialisation terminée ! Les deux onglets sont prêts.');
+  creerOngletNewsletter(ss);
+  SpreadsheetApp.getUi().alert('✅ Initialisation terminée ! Les trois onglets sont prêts.');
 }
 
 function creerOngletAteliers(ss) {
@@ -486,7 +531,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
                   <p style="margin:0 0 5px;font-size:15px;color:#555;">🕐 &nbsp;${atelier.debut} – ${atelier.fin}</p>
                   <p style="margin:0 0 5px;font-size:15px;color:#555;">👤 &nbsp;${escapeHtml(nom)}</p>
                   ${participantsLigne}
-                  <p style="margin:0;font-size:15px;color:#555;">📍 &nbsp;55 allée Georges Leygues, 83000 Toulon</p>
+                  <p style="margin:0;font-size:15px;color:#555;">📍 &nbsp;<a href="https://maps.google.com/?q=265+allée+Georges+Leygues+83000+Toulon" style="color:#1F6B2E;text-decoration:underline;">Écoferme, 55, allée Georges Leygues, 83000 Toulon</a></p>
                 </td>
               </tr>
             </table>
@@ -542,7 +587,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
               <a href="mailto:ecoferme@var.fr" style="color:#1F6B2E;text-decoration:none;">✉ ecoferme@var.fr</a>
             </p>
             <p style="margin:0 0 20px;font-size:14px;color:#333;">
-              <a href="https://maps.google.com/?q=265+allée+Georges+Leygues+83000+Toulon" style="color:#1F6B2E;text-decoration:none;">📍 55 allée Georges Leygues, 83000 Toulon</a>
+              <a href="https://maps.google.com/?q=265+allée+Georges+Leygues+83000+Toulon" style="color:#1F6B2E;text-decoration:underline;">📍 Écoferme, 55, allée Georges Leygues, 83000 Toulon</a>
             </p>
 
             <!-- Facebook -->
@@ -681,7 +726,7 @@ function _dateTriable(val) {
 
 function onOpen() {
   SpreadsheetApp.getUi()
-    .createMenu('🎨 Ateliers')
+    .createMenu('Ateliers')
     .addItem('Initialiser les onglets',       'initialiserSheet')
     .addItem('Organiser les réservations',    'organiserReservations')
     .addToUi();
