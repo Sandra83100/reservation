@@ -729,5 +729,36 @@ function onOpen() {
     .createMenu('Ateliers')
     .addItem('Initialiser les onglets',       'initialiserSheet')
     .addItem('Organiser les réservations',    'organiserReservations')
+    .addItem('Reparer les en-têtes',          'reparerEnTetes')
     .addToUi();
+}
+
+/**
+ * Corrige les en-têtes corrompus sans effacer les données existantes.
+ */
+function reparerEnTetes() {
+  const ss = getSpreadsheet();
+
+  // Onglet Newsletter
+  const newsletter = ss.getSheetByName(ONGLET_NEWSLETTER);
+  if (newsletter) {
+    const headers = ['Date inscription', 'Prénom / Nom', 'Email', 'Via atelier'];
+    newsletter.getRange(1, 1, 1, headers.length).setValues([headers]);
+    newsletter.getRange(1, 1, 1, headers.length)
+      .setBackground('#1F6B2E').setFontColor('#FFFFFF')
+      .setFontWeight('bold').setHorizontalAlignment('center');
+  }
+
+  // Onglet Réservations
+  const reservations = ss.getSheetByName(ONGLET_RESERVATIONS);
+  if (reservations) {
+    const headers = ['#', 'Atelier', 'Date', 'Heure début', 'Heure fin',
+                     'Nom / Prénom', 'Email', 'Téléphone', 'ID Atelier', 'Soumis le', 'Nb personnes'];
+    reservations.getRange(1, 1, 1, headers.length).setValues([headers]);
+    reservations.getRange(1, 1, 1, headers.length)
+      .setBackground('#1F6B2E').setFontColor('#FFFFFF')
+      .setFontWeight('bold').setHorizontalAlignment('center');
+  }
+
+  SpreadsheetApp.getUi().alert('En-têtes corrigés !');
 }
