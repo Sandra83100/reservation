@@ -179,7 +179,8 @@ function handleAnnulation(token) {
   try {
     if (!token) return page('Lien invalide', 'Ce lien d\'annulation est invalide.', '#C0392B');
 
-    const decoded   = Utilities.newBlob(Utilities.base64DecodeWebSafe(token)).getDataAsString();
+    const paddedToken = token + '==='.slice(0, (4 - token.length % 4) % 4);
+    const decoded   = Utilities.newBlob(Utilities.base64DecodeWebSafe(paddedToken)).getDataAsString();
     const parts     = decoded.split('|');
     if (parts.length < 2) return page('Lien invalide', 'Ce lien est invalide ou expiré.', '#C0392B');
 
@@ -432,9 +433,9 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
     const dateLisible = formatDateLisible(atelier.date);
     const sujet       = `✅ Confirmation — ${atelier.nom} le ${dateLisible}`;
 
-    // --- Token annulation ---
-    const token     = Utilities.base64EncodeWebSafe(email + '|' + atelier.id);
-    const cancelUrl = SCRIPT_URL + '?action=annuler&token=' + encodeURIComponent(token);
+    // --- Token annulation (sans padding = pour éviter les problèmes dans les URLs) ---
+    const token     = Utilities.base64EncodeWebSafe(email + '|' + atelier.id).replace(/=+$/, '');
+    const cancelUrl = SCRIPT_URL + '?action=annuler&token=' + token;
 
     // --- URL Google Calendar ---
     const gcalStart = dateToGcal(atelier.date, atelier.debut);
