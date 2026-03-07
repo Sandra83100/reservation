@@ -434,7 +434,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
 
     // --- Token annulation ---
     const token     = Utilities.base64EncodeWebSafe(email + '|' + atelier.id);
-    const cancelUrl = SCRIPT_URL + '?action=annuler&token=' + token;
+    const cancelUrl = SCRIPT_URL + '?action=annuler&token=' + encodeURIComponent(token);
 
     // --- URL Google Calendar ---
     const gcalStart = dateToGcal(atelier.date, atelier.debut);
@@ -547,21 +547,21 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
               </tr>
             </table>
 
-            <!-- BLOC D — Ajouter à mon agenda (en bas du bloc blanc) -->
+            <!-- BLOC D — Ajouter la réservation à mon agenda (en bas du bloc blanc) -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
               <tr>
                 <td align="center">
-                  <p style="margin:0 0 14px;font-size:15px;color:#333;font-weight:bold;text-transform:uppercase;letter-spacing:0.8px;">📅 Ajouter à mon agenda</p>
-                  <table cellpadding="0" cellspacing="0">
+                  <p style="margin:0 0 14px;font-size:15px;color:#333;font-weight:bold;text-transform:uppercase;letter-spacing:0.8px;">Ajouter la réservation à mon agenda</p>
+                  <table cellpadding="0" cellspacing="6">
                     <tr>
-                      <td style="padding:0 4px 0 0;">
-                        <a href="${calendarUrl}" target="_blank" style="display:inline-block;padding:10px 14px;background:#ffffff;border:2px solid #2D8B3E;color:#2D8B3E;border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold;">📅 Google Agenda</a>
+                      <td>
+                        <a href="${calendarUrl}" target="_blank" style="display:inline-block;padding:10px 16px;background:#4285F4;color:#ffffff;border-radius:6px;text-decoration:none;font-size:13px;font-weight:bold;font-family:Arial,sans-serif;">Google Agenda</a>
                       </td>
-                      <td style="padding:0 4px;">
-                        <a href="${icsUrl}" style="display:inline-block;padding:10px 14px;background:#ffffff;border:2px solid #2D8B3E;color:#2D8B3E;border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold;">🍎 Apple Calendar</a>
+                      <td>
+                        <a href="${icsUrl}" style="display:inline-block;padding:10px 16px;background:#1C1C1E;color:#ffffff;border-radius:6px;text-decoration:none;font-size:13px;font-weight:bold;font-family:Arial,sans-serif;">Apple Calendar</a>
                       </td>
-                      <td style="padding:0 0 0 4px;">
-                        <a href="${icsUrl}" download="atelier-ecoferme.ics" style="display:inline-block;padding:10px 14px;background:#ffffff;border:2px solid #2D8B3E;color:#2D8B3E;border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold;">📥 Autre / Outlook</a>
+                      <td>
+                        <a href="${icsUrl}" download="atelier-ecoferme.ics" style="display:inline-block;padding:10px 16px;background:#0078D4;color:#ffffff;border-radius:6px;text-decoration:none;font-size:13px;font-weight:bold;font-family:Arial,sans-serif;">Outlook</a>
                       </td>
                     </tr>
                   </table>
