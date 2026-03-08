@@ -606,7 +606,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
               </tr>
             </table>
 
-            <!-- BLOC D — Ajouter à mon agenda (cartes icône app-style) -->
+            <!-- BLOC D — Ajouter à mon agenda (icônes app-style SVG) -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
               <tr>
                 <td align="center">
@@ -615,61 +615,63 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
                     <tr valign="top">
 
                       <!-- 1. Google Agenda -->
-                      <td style="padding:0 7px;">
+                      <td style="padding:0 10px;text-align:center;">
                         <a href="${calendarUrl}" target="_blank" style="display:inline-block;text-decoration:none;">
-                          <table cellpadding="0" cellspacing="0" width="108" style="border:1.5px solid #dadce0;border-radius:12px;overflow:hidden;background:#ffffff;">
-                            <tr>
-                              <td align="center" style="padding:14px 10px 8px;background:#ffffff;">
-                                <img src="https://ssl.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" width="34" height="34" alt="G" style="display:block;margin:0 auto;" />
-                              </td>
-                            </tr>
-                            <tr>
-                              <td align="center" style="padding:4px 8px 14px;font-size:12px;font-weight:bold;color:#3c4043;font-family:Arial,sans-serif;line-height:1.4;">Google<br/>Agenda</td>
-                            </tr>
-                          </table>
+                          <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="60" height="60" rx="13" fill="white"/>
+                            <rect x="1.5" y="1.5" width="28" height="28" fill="#4285F4"/>
+                            <rect x="30.5" y="1.5" width="28" height="28" fill="#EA4335"/>
+                            <rect x="1.5" y="30.5" width="28" height="28" fill="#34A853"/>
+                            <rect x="30.5" y="30.5" width="28" height="28" fill="#FBBC04"/>
+                            <path d="M 0 0 L 13 0 Q 0 0 0 13 Z" fill="white"/>
+                            <path d="M 60 0 L 47 0 Q 60 0 60 13 Z" fill="white"/>
+                            <path d="M 0 60 L 0 47 Q 0 60 13 60 Z" fill="white"/>
+                            <path d="M 60 60 L 60 47 Q 60 60 47 60 Z" fill="white"/>
+                            <rect x="14" y="14" width="32" height="32" fill="white"/>
+                            <text x="30" y="34" text-anchor="middle" fill="#4285F4" font-family="Arial,sans-serif" font-weight="bold" font-size="15">${jourNum}</text>
+                            <rect width="60" height="60" rx="13" fill="none" stroke="#dadce0" stroke-width="1.5"/>
+                            <circle cx="49" cy="49" r="10" fill="white" stroke="#dadce0" stroke-width="1.5"/>
+                            <text x="49" y="54" text-anchor="middle" fill="#34A853" font-family="Arial,sans-serif" font-weight="bold" font-size="16">+</text>
+                          </svg>
+                          <table cellpadding="0" cellspacing="0" width="60"><tr><td align="center" style="font-size:11px;font-weight:bold;color:#444;font-family:Arial,sans-serif;padding-top:6px;line-height:1.4;">Google<br/>Agenda</td></tr></table>
                         </a>
                       </td>
 
-                      <!-- 2. Apple Calendar (icône avec date réelle de l'atelier) -->
-                      <td style="padding:0 7px;">
+                      <!-- 2. Apple Calendar -->
+                      <td style="padding:0 10px;text-align:center;">
                         <a href="${icsUrl}" style="display:inline-block;text-decoration:none;">
-                          <table cellpadding="0" cellspacing="0" width="108" style="border:1.5px solid #dadce0;border-radius:12px;overflow:hidden;background:#ffffff;">
-                            <tr>
-                              <td align="center" style="padding:14px 10px 8px;background:#ffffff;">
-                                <table cellpadding="0" cellspacing="0" width="34" style="border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;">
-                                  <tr>
-                                    <td height="13" align="center" bgcolor="#FF3B30" style="font-size:7px;font-weight:bold;color:#ffffff;font-family:Arial,sans-serif;letter-spacing:0.5px;line-height:13px;">${moisCourt}</td>
-                                  </tr>
-                                  <tr>
-                                    <td height="22" align="center" bgcolor="#ffffff" style="font-size:15px;font-weight:bold;color:#1a1a1a;font-family:Arial,sans-serif;line-height:22px;">${jourNum}</td>
-                                  </tr>
-                                </table>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td align="center" style="padding:4px 8px 14px;font-size:12px;font-weight:bold;color:#3c4043;font-family:Arial,sans-serif;line-height:1.4;">Apple<br/>Calendar</td>
-                            </tr>
-                          </table>
+                          <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="60" height="60" rx="13" fill="white"/>
+                            <rect x="1.5" y="1.5" width="57" height="21" rx="11.5" fill="#FF3B30"/>
+                            <rect x="1.5" y="12" width="57" height="11" fill="#FF3B30"/>
+                            <text x="30" y="17" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-weight="bold" font-size="9" letter-spacing="1.5">${moisCourt}</text>
+                            <text x="30" y="50" text-anchor="middle" fill="#1a1a1a" font-family="Arial,sans-serif" font-weight="bold" font-size="26">${jourNum}</text>
+                            <rect width="60" height="60" rx="13" fill="none" stroke="#dadce0" stroke-width="1.5"/>
+                            <circle cx="49" cy="49" r="10" fill="white" stroke="#dadce0" stroke-width="1.5"/>
+                            <text x="49" y="54" text-anchor="middle" fill="#FF3B30" font-family="Arial,sans-serif" font-weight="bold" font-size="16">+</text>
+                          </svg>
+                          <table cellpadding="0" cellspacing="0" width="60"><tr><td align="center" style="font-size:11px;font-weight:bold;color:#444;font-family:Arial,sans-serif;padding-top:6px;line-height:1.4;">Apple<br/>Calendar</td></tr></table>
                         </a>
                       </td>
 
-                      <!-- 3. Outlook -->
-                      <td style="padding:0 7px;">
-                        <a href="${icsUrl}" download="atelier-ecoferme.ics" style="display:inline-block;text-decoration:none;">
-                          <table cellpadding="0" cellspacing="0" width="108" style="border:1.5px solid #dadce0;border-radius:12px;overflow:hidden;background:#ffffff;">
-                            <tr>
-                              <td align="center" style="padding:14px 10px 8px;background:#ffffff;">
-                                <table cellpadding="0" cellspacing="0" width="34" height="34" style="border-radius:8px;overflow:hidden;background:#0078D4;">
-                                  <tr>
-                                    <td align="center" valign="middle" width="34" height="34" style="font-family:Calibri,Arial,sans-serif;font-size:23px;font-weight:bold;color:#ffffff;line-height:34px;">O</td>
-                                  </tr>
-                                </table>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td align="center" style="padding:4px 8px 14px;font-size:12px;font-weight:bold;color:#3c4043;font-family:Arial,sans-serif;line-height:1.4;">Outlook<br/>&nbsp;</td>
-                            </tr>
-                          </table>
+                      <!-- 3. Microsoft Outlook -->
+                      <td style="padding:0 10px;text-align:center;">
+                        <a href="${icsUrl}" style="display:inline-block;text-decoration:none;">
+                          <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="60" height="60" rx="13" fill="#0078D4"/>
+                            <rect x="10" y="12" width="40" height="36" rx="4" fill="none" stroke="white" stroke-width="2"/>
+                            <line x1="10" y1="23" x2="50" y2="23" stroke="white" stroke-width="2"/>
+                            <rect x="20" y="8" width="4" height="9" rx="2" fill="white"/>
+                            <rect x="36" y="8" width="4" height="9" rx="2" fill="white"/>
+                            <rect x="15" y="28" width="7" height="7" rx="1.5" fill="white"/>
+                            <rect x="26" y="28" width="7" height="7" rx="1.5" fill="white"/>
+                            <rect x="37" y="28" width="7" height="7" rx="1.5" fill="white"/>
+                            <rect x="15" y="38" width="7" height="7" rx="1.5" fill="white"/>
+                            <rect x="26" y="38" width="7" height="7" rx="1.5" fill="white"/>
+                            <circle cx="49" cy="49" r="10" fill="white"/>
+                            <text x="49" y="54" text-anchor="middle" fill="#0078D4" font-family="Arial,sans-serif" font-weight="bold" font-size="16">+</text>
+                          </svg>
+                          <table cellpadding="0" cellspacing="0" width="60"><tr><td align="center" style="font-size:11px;font-weight:bold;color:#444;font-family:Arial,sans-serif;padding-top:6px;line-height:1.4;">Microsoft<br/>Outlook</td></tr></table>
                         </a>
                       </td>
 
