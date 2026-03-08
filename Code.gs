@@ -186,7 +186,7 @@ function handleAnnulation(token) {
   <div class="box">
     <h2>${titre}</h2>
     <p>${message}</p>
-    <a class="btn" href="https://sandra83100.github.io/reservation/">← Retour au site</a>
+    <a class="btn" href="https://sandramarino.fr/reservation/">← Retour au site</a>
   </div>
 </body>
 </html>`);
@@ -488,7 +488,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
 
     // --- Token annulation — lien vers GitHub Pages (évite le problème Drive de Gmail) ---
     const token     = Utilities.base64EncodeWebSafe(email + '|' + atelier.id).replace(/=+$/, '');
-    const cancelUrl = 'https://sandra83100.github.io/reservation/?action=annuler&token=' + token;
+    const cancelUrl = 'https://sandramarino.fr/reservation/?action=annuler&token=' + token;
 
     // --- URL Google Calendar ---
     const gcalStart = dateToGcal(atelier.date, atelier.debut);
@@ -518,7 +518,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
     // --- Photo de l'atelier (URL absolue publique) ---
     // ⚠️ Remplacer les URL picsum par les vraies photos quand disponibles
     const PHOTOS_ATELIERS = {
-      'Rencontre avec les animaux':      'https://sandra83100.github.io/reservation/images/animaux/Fine1.jpg',
+      'Rencontre avec les animaux':      'https://sandramarino.fr/reservation/images/animaux/Fine1.jpg',
       "Mémoires de l'écoferme":          'https://picsum.photos/seed/ferme77/700/400',
       "Visite découverte de l'Écoferme": 'https://picsum.photos/seed/ecoferme33/700/400'
     };
@@ -564,7 +564,7 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
         <!-- BLOC A — En-tête visuel : logo + titre -->
         <tr>
           <td style="background:#1F6B2E;padding:24px 40px;text-align:center;">
-            <img src="https://URL-DU-LOGO-A-REMPLACER.png" alt="Écoferme départementale de la Barre" height="60" style="display:block;margin:0 auto 12px auto;">
+            <img src="https://sandramarino.fr/reservation/logo-ecoferme.png" alt="Écoferme départementale de la Barre" height="60" style="display:block;margin:0 auto 12px auto;">
             <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:normal;">🎉 Réservation confirmée</h1>
           </td>
         </tr>
@@ -616,63 +616,63 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
                     <tr valign="top">
 
                       <!-- 1. Google Agenda -->
-                      <td style="padding:0 10px;text-align:center;">
+                      <td style="padding:0 14px;text-align:center;">
                         <a href="${calendarUrl}" target="_blank" style="display:inline-block;text-decoration:none;">
-                          <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="60" height="60" rx="13" fill="white"/>
-                            <rect x="1.5" y="1.5" width="28" height="28" fill="#4285F4"/>
-                            <rect x="30.5" y="1.5" width="28" height="28" fill="#EA4335"/>
-                            <rect x="1.5" y="30.5" width="28" height="28" fill="#34A853"/>
-                            <rect x="30.5" y="30.5" width="28" height="28" fill="#FBBC04"/>
-                            <path d="M 0 0 L 13 0 Q 0 0 0 13 Z" fill="white"/>
-                            <path d="M 60 0 L 47 0 Q 60 0 60 13 Z" fill="white"/>
-                            <path d="M 0 60 L 0 47 Q 0 60 13 60 Z" fill="white"/>
-                            <path d="M 60 60 L 60 47 Q 60 60 47 60 Z" fill="white"/>
-                            <rect x="14" y="14" width="32" height="32" fill="white"/>
-                            <text x="30" y="34" text-anchor="middle" fill="#4285F4" font-family="Arial,sans-serif" font-weight="bold" font-size="15">${jourNum}</text>
-                            <rect width="60" height="60" rx="13" fill="none" stroke="#dadce0" stroke-width="1.5"/>
-                            <circle cx="49" cy="49" r="10" fill="white" stroke="#dadce0" stroke-width="1.5"/>
-                            <text x="49" y="54" text-anchor="middle" fill="#34A853" font-family="Arial,sans-serif" font-weight="bold" font-size="16">+</text>
+                          <svg width="70" height="70" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="70" height="70" rx="15" fill="white"/>
+                            <rect x="2" y="2" width="32" height="32" fill="#4285F4"/>
+                            <rect x="36" y="2" width="32" height="32" fill="#EA4335"/>
+                            <rect x="2" y="36" width="32" height="32" fill="#34A853"/>
+                            <rect x="36" y="36" width="32" height="32" fill="#FBBC04"/>
+                            <path d="M 0 0 L 15 0 Q 0 0 0 15 Z" fill="white"/>
+                            <path d="M 70 0 L 55 0 Q 70 0 70 15 Z" fill="white"/>
+                            <path d="M 0 70 L 0 55 Q 0 70 15 70 Z" fill="white"/>
+                            <path d="M 70 70 L 70 55 Q 70 70 55 70 Z" fill="white"/>
+                            <rect x="16" y="16" width="38" height="38" fill="white"/>
+                            <text x="35" y="40" text-anchor="middle" fill="#4285F4" font-family="Arial,sans-serif" font-weight="bold" font-size="18">${jourNum}</text>
+                            <rect width="70" height="70" rx="15" fill="none" stroke="#dadce0" stroke-width="1.5"/>
+                            <circle cx="57" cy="57" r="11" fill="white" stroke="#dadce0" stroke-width="1.5"/>
+                            <text x="57" y="62" text-anchor="middle" fill="#34A853" font-family="Arial,sans-serif" font-weight="bold" font-size="17">+</text>
                           </svg>
-                          <table cellpadding="0" cellspacing="0" width="60"><tr><td align="center" style="font-size:11px;font-weight:bold;color:#444;font-family:Arial,sans-serif;padding-top:6px;line-height:1.4;">Google<br/>Agenda</td></tr></table>
+                          <table cellpadding="0" cellspacing="0" width="80"><tr><td align="center" style="font-size:10px;font-weight:bold;color:#444;font-family:Arial,sans-serif;padding-top:7px;line-height:1.5;text-transform:uppercase;">Ajouter à<br/>Google Agenda</td></tr></table>
                         </a>
                       </td>
 
-                      <!-- 2. Apple Calendar -->
-                      <td style="padding:0 10px;text-align:center;">
+                      <!-- 2. Microsoft Outlook -->
+                      <td style="padding:0 14px;text-align:center;">
                         <a href="${icsUrl}" style="display:inline-block;text-decoration:none;">
-                          <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="60" height="60" rx="13" fill="white"/>
-                            <rect x="1.5" y="1.5" width="57" height="21" rx="11.5" fill="#FF3B30"/>
-                            <rect x="1.5" y="12" width="57" height="11" fill="#FF3B30"/>
-                            <text x="30" y="17" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-weight="bold" font-size="9" letter-spacing="1.5">${moisCourt}</text>
-                            <text x="30" y="50" text-anchor="middle" fill="#1a1a1a" font-family="Arial,sans-serif" font-weight="bold" font-size="26">${jourNum}</text>
-                            <rect width="60" height="60" rx="13" fill="none" stroke="#dadce0" stroke-width="1.5"/>
-                            <circle cx="49" cy="49" r="10" fill="white" stroke="#dadce0" stroke-width="1.5"/>
-                            <text x="49" y="54" text-anchor="middle" fill="#FF3B30" font-family="Arial,sans-serif" font-weight="bold" font-size="16">+</text>
+                          <svg width="70" height="70" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="70" height="70" rx="15" fill="#0078D4"/>
+                            <rect x="11" y="14" width="48" height="42" rx="5" fill="none" stroke="white" stroke-width="2.5"/>
+                            <line x1="11" y1="26" x2="59" y2="26" stroke="white" stroke-width="2.5"/>
+                            <rect x="23" y="9" width="5" height="11" rx="2.5" fill="white"/>
+                            <rect x="42" y="9" width="5" height="11" rx="2.5" fill="white"/>
+                            <rect x="17" y="32" width="8" height="8" rx="2" fill="white"/>
+                            <rect x="31" y="32" width="8" height="8" rx="2" fill="white"/>
+                            <rect x="45" y="32" width="8" height="8" rx="2" fill="white"/>
+                            <rect x="17" y="44" width="8" height="8" rx="2" fill="white"/>
+                            <rect x="31" y="44" width="8" height="8" rx="2" fill="white"/>
+                            <circle cx="57" cy="57" r="11" fill="white"/>
+                            <text x="57" y="62" text-anchor="middle" fill="#0078D4" font-family="Arial,sans-serif" font-weight="bold" font-size="17">+</text>
                           </svg>
-                          <table cellpadding="0" cellspacing="0" width="60"><tr><td align="center" style="font-size:11px;font-weight:bold;color:#444;font-family:Arial,sans-serif;padding-top:6px;line-height:1.4;">Apple<br/>Calendar</td></tr></table>
+                          <table cellpadding="0" cellspacing="0" width="80"><tr><td align="center" style="font-size:10px;font-weight:bold;color:#444;font-family:Arial,sans-serif;padding-top:7px;line-height:1.5;text-transform:uppercase;">Ajouter à<br/>Microsoft Outlook</td></tr></table>
                         </a>
                       </td>
 
-                      <!-- 3. Microsoft Outlook -->
-                      <td style="padding:0 10px;text-align:center;">
+                      <!-- 3. Apple Calendar -->
+                      <td style="padding:0 14px;text-align:center;">
                         <a href="${icsUrl}" style="display:inline-block;text-decoration:none;">
-                          <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="60" height="60" rx="13" fill="#0078D4"/>
-                            <rect x="10" y="12" width="40" height="36" rx="4" fill="none" stroke="white" stroke-width="2"/>
-                            <line x1="10" y1="23" x2="50" y2="23" stroke="white" stroke-width="2"/>
-                            <rect x="20" y="8" width="4" height="9" rx="2" fill="white"/>
-                            <rect x="36" y="8" width="4" height="9" rx="2" fill="white"/>
-                            <rect x="15" y="28" width="7" height="7" rx="1.5" fill="white"/>
-                            <rect x="26" y="28" width="7" height="7" rx="1.5" fill="white"/>
-                            <rect x="37" y="28" width="7" height="7" rx="1.5" fill="white"/>
-                            <rect x="15" y="38" width="7" height="7" rx="1.5" fill="white"/>
-                            <rect x="26" y="38" width="7" height="7" rx="1.5" fill="white"/>
-                            <circle cx="49" cy="49" r="10" fill="white"/>
-                            <text x="49" y="54" text-anchor="middle" fill="#0078D4" font-family="Arial,sans-serif" font-weight="bold" font-size="16">+</text>
+                          <svg width="70" height="70" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="70" height="70" rx="15" fill="white"/>
+                            <rect x="2" y="2" width="66" height="24" rx="13" fill="#FF3B30"/>
+                            <rect x="2" y="14" width="66" height="13" fill="#FF3B30"/>
+                            <text x="35" y="21" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-weight="bold" font-size="11" letter-spacing="2">${moisCourt}</text>
+                            <text x="35" y="58" text-anchor="middle" fill="#1a1a1a" font-family="Arial,sans-serif" font-weight="bold" font-size="30">${jourNum}</text>
+                            <rect width="70" height="70" rx="15" fill="none" stroke="#dadce0" stroke-width="1.5"/>
+                            <circle cx="57" cy="57" r="11" fill="white" stroke="#dadce0" stroke-width="1.5"/>
+                            <text x="57" y="62" text-anchor="middle" fill="#FF3B30" font-family="Arial,sans-serif" font-weight="bold" font-size="17">+</text>
                           </svg>
-                          <table cellpadding="0" cellspacing="0" width="60"><tr><td align="center" style="font-size:11px;font-weight:bold;color:#444;font-family:Arial,sans-serif;padding-top:6px;line-height:1.4;">Microsoft<br/>Outlook</td></tr></table>
+                          <table cellpadding="0" cellspacing="0" width="80"><tr><td align="center" style="font-size:10px;font-weight:bold;color:#444;font-family:Arial,sans-serif;padding-top:7px;line-height:1.5;text-transform:uppercase;">Ajouter à<br/>l'Agenda Apple</td></tr></table>
                         </a>
                       </td>
 
@@ -705,6 +705,11 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
                 <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#3b5998;border-radius:4px;color:#ffffff;font-weight:bold;font-size:13px;line-height:1;">f</span>
                 Suivez notre actualité sur Facebook
               </a>
+            </p>
+
+            <!-- Logo Département du Var -->
+            <p style="margin:0 0 20px;">
+              <img src="https://sandramarino.fr/reservation/logo-departement.png" alt="Département du Var" height="55" style="display:inline-block;">
             </p>
 
             <hr style="border:none;border-top:1px solid #c8dfc9;margin:0 0 12px;">
