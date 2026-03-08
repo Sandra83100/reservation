@@ -483,6 +483,12 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
     // --- URL ICS (Apple Calendar / Outlook) ---
     const icsUrl = SCRIPT_URL + '?action=ics&id=' + atelier.id;
 
+    // --- Données pour l'icône Apple Calendar (affiche la vraie date de l'atelier) ---
+    const [jourStr, moisStrN] = atelier.date.split('/');
+    const jourNum  = parseInt(jourStr, 10);
+    const _moisCourts = ['JAN','FÉV','MAR','AVR','MAI','JUN','JUL','AOÛ','SEP','OCT','NOV','DÉC'];
+    const moisCourt = _moisCourts[parseInt(moisStrN, 10) - 1] || '';
+
     // --- Labels âge ---
     const labelsAge = {
       'moins-3ans': 'Moins de 3 ans',
@@ -582,22 +588,73 @@ function envoyerEmailConfirmation(email, nom, atelier, nbPersonnes, agesEnfants)
               </tr>
             </table>
 
-            <!-- BLOC D — Ajouter la réservation à mon agenda (en bas du bloc blanc) -->
+            <!-- BLOC D — Ajouter à mon agenda (cartes icône app-style) -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
               <tr>
                 <td align="center">
-                  <p style="margin:0 0 14px;font-size:15px;color:#333;font-weight:bold;text-transform:uppercase;letter-spacing:0.8px;">Ajouter la réservation à mon agenda</p>
-                  <table cellpadding="0" cellspacing="6">
-                    <tr>
-                      <td>
-                        <a href="${calendarUrl}" target="_blank" style="display:inline-block;padding:10px 16px;background:#4285F4;color:#ffffff;border-radius:6px;text-decoration:none;font-size:13px;font-weight:bold;font-family:Arial,sans-serif;">Google Agenda</a>
+                  <p style="margin:0 0 18px;font-size:15px;color:#333;font-weight:bold;text-transform:uppercase;letter-spacing:0.8px;">Ajouter à mon agenda</p>
+                  <table cellpadding="0" cellspacing="0">
+                    <tr valign="top">
+
+                      <!-- 1. Google Agenda -->
+                      <td style="padding:0 7px;">
+                        <a href="${calendarUrl}" target="_blank" style="display:inline-block;text-decoration:none;">
+                          <table cellpadding="0" cellspacing="0" width="108" style="border:1.5px solid #dadce0;border-radius:12px;overflow:hidden;background:#ffffff;">
+                            <tr>
+                              <td align="center" style="padding:14px 10px 8px;background:#ffffff;">
+                                <img src="https://ssl.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" width="34" height="34" alt="G" style="display:block;margin:0 auto;" />
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="padding:4px 8px 14px;font-size:12px;font-weight:bold;color:#3c4043;font-family:Arial,sans-serif;line-height:1.4;">Google<br/>Agenda</td>
+                            </tr>
+                          </table>
+                        </a>
                       </td>
-                      <td>
-                        <a href="${icsUrl}" style="display:inline-block;padding:10px 16px;background:#1C1C1E;color:#ffffff;border-radius:6px;text-decoration:none;font-size:13px;font-weight:bold;font-family:Arial,sans-serif;">Apple Calendar</a>
+
+                      <!-- 2. Apple Calendar (icône avec date réelle de l'atelier) -->
+                      <td style="padding:0 7px;">
+                        <a href="${icsUrl}" style="display:inline-block;text-decoration:none;">
+                          <table cellpadding="0" cellspacing="0" width="108" style="border:1.5px solid #dadce0;border-radius:12px;overflow:hidden;background:#ffffff;">
+                            <tr>
+                              <td align="center" style="padding:14px 10px 8px;background:#ffffff;">
+                                <table cellpadding="0" cellspacing="0" width="34" style="border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;">
+                                  <tr>
+                                    <td height="13" align="center" bgcolor="#FF3B30" style="font-size:7px;font-weight:bold;color:#ffffff;font-family:Arial,sans-serif;letter-spacing:0.5px;line-height:13px;">${moisCourt}</td>
+                                  </tr>
+                                  <tr>
+                                    <td height="22" align="center" bgcolor="#ffffff" style="font-size:15px;font-weight:bold;color:#1a1a1a;font-family:Arial,sans-serif;line-height:22px;">${jourNum}</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="padding:4px 8px 14px;font-size:12px;font-weight:bold;color:#3c4043;font-family:Arial,sans-serif;line-height:1.4;">Apple<br/>Calendar</td>
+                            </tr>
+                          </table>
+                        </a>
                       </td>
-                      <td>
-                        <a href="${icsUrl}" download="atelier-ecoferme.ics" style="display:inline-block;padding:10px 16px;background:#0078D4;color:#ffffff;border-radius:6px;text-decoration:none;font-size:13px;font-weight:bold;font-family:Arial,sans-serif;">Outlook</a>
+
+                      <!-- 3. Outlook -->
+                      <td style="padding:0 7px;">
+                        <a href="${icsUrl}" download="atelier-ecoferme.ics" style="display:inline-block;text-decoration:none;">
+                          <table cellpadding="0" cellspacing="0" width="108" style="border:1.5px solid #dadce0;border-radius:12px;overflow:hidden;background:#ffffff;">
+                            <tr>
+                              <td align="center" style="padding:14px 10px 8px;background:#ffffff;">
+                                <table cellpadding="0" cellspacing="0" width="34" height="34" style="border-radius:8px;overflow:hidden;background:#0078D4;">
+                                  <tr>
+                                    <td align="center" valign="middle" width="34" height="34" style="font-family:Calibri,Arial,sans-serif;font-size:23px;font-weight:bold;color:#ffffff;line-height:34px;">O</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="padding:4px 8px 14px;font-size:12px;font-weight:bold;color:#3c4043;font-family:Arial,sans-serif;line-height:1.4;">Outlook<br/>&nbsp;</td>
+                            </tr>
+                          </table>
+                        </a>
                       </td>
+
                     </tr>
                   </table>
                 </td>
