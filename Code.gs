@@ -126,19 +126,34 @@ function getAteliers() {
     }
   });
 
+  const maintenant = new Date();
+
   return ateliers.map((a, i) => {
     const id        = i + 1;
     const placesMax = Number(a['Nb places max']) || 0;
     const reservees = compteur[id] || 0;
     const restantes = Math.max(0, placesMax - reservees);
+    const dateStr   = formatDate(a['Date']);
+
+    // Clôture des réservations à 8h le jour de l'atelier
+    let ferme = false;
+    if (dateStr) {
+      const parts = dateStr.split('/');
+      if (parts.length === 3) {
+        const cutoff = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]), 8, 0, 0);
+        ferme = maintenant >= cutoff;
+      }
+    }
+
     return {
       id,
       nom:             a['Nom de l\'atelier'] || '',
-      date:            formatDate(a['Date']),
+      date:            dateStr,
       debut:           formatTime(a['Heure début']),
       fin:             formatTime(a['Heure fin']),
       placesMax,
-      placesRestantes: restantes
+      placesRestantes: restantes,
+      ferme
     };
   });
 }
@@ -299,6 +314,9 @@ function doPost(e) {
     const ateliers = getAteliers();
     const atelier  = ateliers.find(a => a.id === Number(atelierId));
     if (!atelier) return jsonResponse({ error: 'Atelier introuvable.' });
+
+    // Vérifier clôture des réservations (8h le jour J)
+    if (atelier.ferme) return jsonResponse({ error: 'Les réservations pour cet atelier sont clôturées depuis 8h ce matin.' });
 
     const nbDemandes = Number(nbPersonnes) || 1;
     if (atelier.placesRestantes <= 0) return jsonResponse({ error: 'Cet atelier est complet.' });

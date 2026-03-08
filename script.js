@@ -192,11 +192,11 @@ function renderCartes() {
 
     const placesMax = slots[0]?.placesMax || 8;
 
-    // Filtrer les créneaux futurs avec places disponibles
+    // Filtrer les créneaux réservables : places dispo ET avant 8h le jour J
     const slotsDispos = slots.filter(a => {
       const [dd, mm, yyyy] = a.date.split('/');
-      const dateAtelier = new Date(yyyy, mm - 1, dd);
-      return dateAtelier >= today && a.placesRestantes > 0;
+      const cutoff = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd), 8, 0, 0);
+      return new Date() < cutoff && a.placesRestantes > 0;
     });
 
     const carte = document.createElement('article');
