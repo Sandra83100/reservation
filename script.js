@@ -1,7 +1,7 @@
 // ============================================================
 //  CONFIGURATION
 // ============================================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXsam9kpgaGdwVbf0LYkqBpgFayk9dexy6y2CyeSvwVqvWB-SMGbrDF5Hn4m2AJKoB/exec';
+const APPS_SCRIPT_URL = 'https://sandramarino.fr/reservation/api/';
 
 // Config visuelle par type d'atelier (photo + description + prix)
 // prix: null = gratuit, chaîne = montant affiché (ex: '5 €/enfant')
@@ -108,15 +108,22 @@ function bindEvents() {
   document.getElementById('form-reservation').addEventListener('submit', soumettreReservation);
 
   // Auto-formatage téléphone : 0612345678 → 06 12 34 56 78
-  document.getElementById('tel').addEventListener('input', (e) => {
-    const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+  // Gère aussi le remplissage automatique au format +33 612345678 → 06 12 34 56 78
+  function formaterTelephone(valeur) {
+    let digits = valeur.replace(/\D/g, '');
+    // Autofill +33 : +33612345678 ou +33 6 12 34 56 78 → 33612345678 (11 chiffres)
+    if (digits.startsWith('33') && digits.length === 11) digits = '0' + digits.slice(2);
+    digits = digits.slice(0, 10);
     let formatted = '';
     for (let i = 0; i < digits.length; i++) {
       if (i > 0 && i % 2 === 0) formatted += ' ';
       formatted += digits[i];
     }
-    e.target.value = formatted;
-  });
+    return formatted;
+  }
+  const telInput = document.getElementById('tel');
+  telInput.addEventListener('input', (e) => { e.target.value = formaterTelephone(e.target.value); });
+  telInput.addEventListener('change', (e) => { e.target.value = formaterTelephone(e.target.value); });
 
   // Stepper personnes animaux
   document.getElementById('stepper-personnes-moins').addEventListener('click', () => changerNbPersonnesAnimaux(-1));
