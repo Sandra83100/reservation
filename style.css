@@ -943,8 +943,10 @@ main {
    FOOTER
    ============================================================ */
 footer {
-  text-align: center;
-  padding: 2.4rem 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.6rem 2rem;
   font-family: 'Nunito', Verdana, sans-serif;
   font-size: .78rem;
   color: var(--texte-doux);
@@ -954,8 +956,9 @@ footer {
 
 .footer-logo-dept {
   display: block;
-  margin: 0 auto 1rem;
-  max-height: 70px;
+  height: 200px;
+  max-height: 200px;
+  width: auto;
   width: auto;
   opacity: .85;
 }
@@ -964,6 +967,12 @@ footer {
   margin: 0;
   font-size: .78rem;
   color: var(--texte-doux);
+}
+
+.champs-obligatoires-note {
+  font-size: .8rem;
+  color: var(--texte-doux);
+  margin: .4rem 0 1.2rem;
 }
 
 /* ============================================================
