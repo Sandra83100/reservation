@@ -538,6 +538,11 @@ async function soumettreReservation(e) {
     });
     const data = await resp.json();
 
+    if (data.clos) {
+      afficherMsgClos(data.message || 'Désolé, les inscriptions pour cet atelier sont closes.');
+      setBoutonConfirmer(false);
+      return;
+    }
     if (data.error) {
       afficherErreurGlobale(data.error);
       setBoutonConfirmer(false);
@@ -626,6 +631,14 @@ function afficherLoader(visible) {
 function afficherErreurGlobale(msg) {
   document.getElementById('erreur-globale-message').textContent = msg;
   document.getElementById('erreur-globale').classList.remove('hidden');
+}
+
+function afficherMsgClos(msg) {
+  const el = document.getElementById('msg-inscriptions-closes');
+  if (el) {
+    el.querySelector('p').textContent = msg;
+    el.classList.remove('hidden');
+  }
 }
 
 function masquerErreurGlobale() {

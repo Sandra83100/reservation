@@ -947,6 +947,32 @@ main {
 }
 
 /* ============================================================
+   INSCRIPTIONS CLOSES (message neutre orange)
+   ============================================================ */
+.msg-inscriptions-closes {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #FFF8E1;
+  border: 1.5px solid #F9A825;
+  border-radius: 12px;
+  padding: .8rem 1.4rem;
+  box-shadow: var(--shadow);
+  z-index: 200;
+  max-width: 90vw;
+  text-align: center;
+}
+
+.msg-inscriptions-closes p {
+  font-family: 'Nunito', Verdana, sans-serif;
+  color: #E65100;
+  font-weight: 700;
+  font-size: .85rem;
+  margin: 0;
+}
+
+/* ============================================================
    FOOTER
    ============================================================ */
 footer {
