@@ -45,13 +45,20 @@ body {
 header {
   background: linear-gradient(150deg, #52C462 0%, #3A9948 40%, #2A5C30 100%);
   color: var(--blanc);
-  text-align: center;
-  padding: 3.2rem 1.5rem 2.6rem;
+  padding: 2rem 2.4rem;
 }
 
 .header-inner {
-  max-width: 720px;
+  max-width: 860px;
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.header-text {
+  flex: 1;
+  text-align: left;
 }
 
 header h1 {
@@ -72,9 +79,9 @@ header h1 {
 /* Logo dans le header */
 .header-logo {
   display: block;
-  margin: 0 auto .9rem;
-  max-height: 70px;
+  height: 140px;
   width: auto;
+  flex-shrink: 0;
 }
 
 /* ============================================================
@@ -943,10 +950,8 @@ main {
    FOOTER
    ============================================================ */
 footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.6rem 2rem;
+  text-align: center;
+  padding: 2.4rem 1.5rem 2rem;
   font-family: 'Nunito', Verdana, sans-serif;
   font-size: .78rem;
   color: var(--texte-doux);
@@ -956,8 +961,8 @@ footer {
 
 .footer-logo-dept {
   display: block;
-  height: 200px;
-  max-height: 200px;
+  margin: 0 auto 1rem;
+  max-height: 70px;
   width: auto;
   width: auto;
   opacity: .85;
