@@ -7,16 +7,15 @@ require_once __DIR__ . '/db.php';
 function envoyerEmail(string $to, string $subject, string $htmlBody): bool {
     $encodedFrom    = '=?UTF-8?B?' . base64_encode(EMAIL_FROM_NAME) . '?=';
     $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
-    $boundary       = md5(uniqid());
 
     $headers  = "MIME-Version: 1.0\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-    $headers .= "Content-Transfer-Encoding: base64\r\n";
+    $headers .= "Content-Transfer-Encoding: quoted-printable\r\n";
     $headers .= "From: {$encodedFrom} <" . EMAIL_FROM . ">\r\n";
     $headers .= "Reply-To: " . EMAIL_CONTACT . "\r\n";
     $headers .= "X-Mailer: PHP/" . PHP_VERSION . "\r\n";
 
-    $body = chunk_split(base64_encode($htmlBody));
+    $body = quoted_printable_encode($htmlBody);
 
     return mail($to, $encodedSubject, $body, $headers);
 }
