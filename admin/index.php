@@ -5,6 +5,7 @@
 //  Onglet 2 : Réservations (lecture + annulation)
 // ============================================================
 session_start();
+header('Content-Type: text/html; charset=UTF-8');
 if (!isset($_SESSION['admin_ok'])) {
     header('Location: login.php');
     exit;
@@ -146,8 +147,8 @@ if (isset($_GET['edit'])) {
     .btn-primary:hover { background: #155221; }
     .btn-secondary { background: #eee; color: #555; }
     .btn-secondary:hover { background: #ddd; }
-    .btn-danger { background: #C62828; color: white; }
-    .btn-danger:hover { background: #a01f1f; }
+    .btn-danger { background: #f0f0f0; color: #777; border: 1px solid #ddd; }
+    .btn-danger:hover { background: #FFEBEE; color: #C62828; border-color: #FFCDD2; }
     .btn-sm { padding: 6px 12px; font-size: 12px; }
 
     /* TABLEAU */
