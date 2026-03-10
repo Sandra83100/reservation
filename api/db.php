@@ -73,6 +73,17 @@ function initTables(PDO $pdo): void {
             date_inscription TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ");
+
+    // Réparation du double-encodage UTF-8 (données insérées avant le fix SET NAMES utf8mb4)
+    // CONVERT(BINARY CONVERT(nom USING latin1) USING utf8mb4) : réinterprète les bytes UTF-8
+    // stockés comme latin1 et les reconvertit correctement en utf8mb4.
+    // Idempotent : ne touche que les lignes contenant 'Ã' (signature du bug).
+    $tables = ['ateliers' => ['nom'], 'reservations' => ['nom_prenom', 'ages_enfants']];
+    foreach ($tables as $table => $cols) {
+        foreach ($cols as $col) {
+            $pdo->exec("UPDATE `$table` SET `$col` = CONVERT(BINARY CONVERT(`$col` USING latin1) USING utf8mb4) WHERE `$col` LIKE '%Ã%'");
+        }
+    }
 }
 
 // ============================================================
